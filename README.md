@@ -28,10 +28,12 @@ Google Slideshow presentation.
 
 ## Bullet points outlining how to fulfill "Additional Requirements"
 
-* A piece of the application must interact with a webhook by an external service
+* A piece of the application must interact with a webhook by an external service (?)
+
 * A piece of the application is “real-time”, which means it can reflect other
 user changes without refreshing
   * Users can see the slides as they are being generated in "real-time"
+
 * A piece of the application has functionality that executes a long-running task
 (something that could take more than 10 seconds to complete)
   * Processing the video uploads and generating the slides are 
