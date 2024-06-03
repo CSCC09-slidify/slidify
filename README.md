@@ -1,4 +1,4 @@
-# Project title By MAC
+# Slidify by MAC
 
 ## Team members with @mail.utoronto.ca emails
 
