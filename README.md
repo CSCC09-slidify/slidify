@@ -46,7 +46,10 @@ user changes without refreshing
   * Implement Express routes
 
 * Beta version:
-  * 
+  * Video uploading is working
+  * The app is able to generate slides from the video
+  * Deployed on a public URL
 
 * Final version:
-  * 
+  * Slides generation from video upload is fully functional
+  * Users can see their slides history
