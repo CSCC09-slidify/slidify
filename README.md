@@ -49,6 +49,7 @@ user changes without refreshing
   * Video uploading is working
   * The app is able to generate slides from the video
   * Deployed on a public URL
+  * Generated slides include an accompanying script for the speaker
 
 * Final version:
   * Slides generation from video upload is fully functional
