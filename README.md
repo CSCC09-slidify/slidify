@@ -27,8 +27,6 @@ Slidify is a web application that converts videos into a sequence of slides base
 
 ## Bullet points outlining how to fulfill "Additional Requirements"
 
-* A piece of the application must interact with a webhook by an external service (?)
-
 * A piece of the application is “real-time”, which means it can reflect other
 user changes without refreshing
   * Users can see the slides and progress percentage as they are being generated in "real-time"
