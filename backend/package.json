@@ -1,0 +1,20 @@
+{
+  "name": "slidify-backend",
+  "version": "1.0.0",
+  "description": "Generate presentations from video",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start:dev": "nodemon app.js",
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.8"
+  }
+}
