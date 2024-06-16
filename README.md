@@ -45,6 +45,7 @@ user changes without refreshing
   * Set-up the third-party APIs
   * Set up endpoints for video upload and storage.
   * Set up Express server to handle HTTP requests.
+  * The app is able to generate basic slides
 
 * Beta version:
   * Video uploading is working
