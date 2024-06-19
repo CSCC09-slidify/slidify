@@ -21,6 +21,7 @@ Slidify is a web application that converts videos into a sequence of slides base
 * The application must interact with at least one third-party API.
   * Google Slides API
   * Google Speech-to-Text API
+  * Google Custom Search API
   * API to summarize content (using Speechmatics API https://www.speechmatics.com)
 
 * Using OAuth 2.0 for account creation and sign-up
