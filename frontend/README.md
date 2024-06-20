@@ -1,4 +1,4 @@
-# 
+# Slidify Frontend
 
 ## Project setup
 ```

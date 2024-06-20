@@ -1,26 +1,60 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <v-layout>
+    <v-app-bar color="primary" prominent>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer">
+        <v-btn icon><v-icon>mdi-history</v-icon></v-btn>
+      </v-app-bar-nav-icon>
+
+      <v-toolbar-title>Slidify</v-toolbar-title>
+
+      <v-spacer></v-spacer>
+    </v-app-bar>
+
+    <v-navigation-drawer
+      v-model="drawer"
+      :location="$vuetify.display.mobile ? 'bottom' : undefined"
+    >
+      <v-list :items="slidesHistory"></v-list>
+    </v-navigation-drawer>
+
+    <v-main>
+      <VideoUpload />
+      <GoogleSlides />
+    </v-main>
+  </v-layout>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import VideoUpload from "./components/VideoUpload.vue";
+import GoogleSlides from "./components/GoogleSlides.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    VideoUpload,
+    GoogleSlides,
+  },
+  data: () => ({
+    drawer: false,
+    // TODO: fetch this dynamically
+    slidesHistory: [
+      {
+        title: "Generated Slides 1",
+        value: "slide1",
+      },
+      {
+        title: "Generated Slides 2",
+        value: "slide2",
+      },
+      {
+        title: "Generated Slides 3",
+        value: "slide3",
+      },
+      {
+        title: "Generated Slides 4",
+        value: "slide4",
+      },
+    ],
+  }),
+};
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
