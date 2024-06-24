@@ -14,7 +14,7 @@ Slidify is a web application that converts videos into a sequence of slides base
 
 * Using Vue 3 for the frontend framework
 
-* Using Express as the core backend API with sqlite as a database to store user information
+* Using Express as the core backend API with sqlite as a database to store user and presentation information
 
 * Deployed on a virtual machine using Docker and Docker Compose
 
