@@ -1,6 +1,7 @@
 import { createApp } from "vue";
-import router from './router'
 import App from "./App.vue";
+import router from "./router";
+import vue3GoogleLogin from "vue3-google-login";
 
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
@@ -13,4 +14,10 @@ const vuetify = createVuetify({
   directives,
 });
 
-createApp(App).use(vuetify).use(router).mount("#app");
+const app = createApp(App);
+
+app.use(vuetify).use(router).use(vue3GoogleLogin, {
+  clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+});
+
+app.mount("#app");

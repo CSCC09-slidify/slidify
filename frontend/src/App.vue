@@ -1,44 +1,32 @@
 <template>
-  <v-layout>
-    <v-app-bar color="white" prominent>
+  <v-app>
+    <v-app-bar class="px-1" color="white" prominent>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer">
-        <v-btn icon><v-icon>mdi-history</v-icon></v-btn>
+        <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
       </v-app-bar-nav-icon>
       <v-toolbar-title>
-        <router-link to="/" class="text-decoration-none"> Slidify </router-link>
+        <router-link to="/" class="text-decoration-none">Slidify</router-link>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-
-      <v-btn text>
-        <router-link to="/login" class="text-decoration-none">
-          Log In
-        </router-link>
-      </v-btn>
-      <v-btn text>
-        <router-link to="/login" class="text-decoration-none">
-          Sign Up
-        </router-link>
-      </v-btn>
+      <GoogleLogin :callback="handleSignIn" class="mr-2"></GoogleLogin>
     </v-app-bar>
-
-    <v-navigation-drawer
-      v-model="drawer"
-      :location="$vuetify.display.mobile ? 'top' : start"
-    >
+    <v-navigation-drawer v-model="drawer">
       <v-list :items="slidesHistory"></v-list>
     </v-navigation-drawer>
-
     <v-main>
       <router-view></router-view>
     </v-main>
-  </v-layout>
+  </v-app>
 </template>
 
 <script>
+import apiService from "@/services/api.service";
+// import { decodeCredential } from 'vue3-google-login'
+
 export default {
   name: "App",
   data: () => ({
-    drawer: false,
+    drawer: true,
     // TODO: fetch this dynamically
     slidesHistory: [
       {
@@ -49,15 +37,22 @@ export default {
         title: "Generated Slides 2",
         value: "slide2",
       },
-      {
-        title: "Generated Slides 3",
-        value: "slide3",
-      },
-      {
-        title: "Generated Slides 4",
-        value: "slide4",
-      },
     ],
   }),
+  methods: {
+    handleSignIn(response) {
+      // const userData = decodeCredential(response.credential)
+      apiService.signIn(response.credential).then((response) => {
+        console.log(response);
+      })
+    },
+  },
 };
 </script>
+
+<style scoped>
+a {
+  text-decoration: none;
+  color: black;
+}
+</style>
