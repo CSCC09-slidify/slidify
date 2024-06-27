@@ -14,14 +14,14 @@ Slidify is a web application that converts videos into a sequence of slides base
 
 * Using Vue 3 for the frontend framework
 
-* Using Express as the core backend API
+* Using Express as the core backend API with sqlite as a database to store user and presentation information
 
 * Deployed on a virtual machine using Docker and Docker Compose
 
 * The application must interact with at least one third-party API.
   * Google Slides API
-  * Google Speech-to-Text API
-  * API to summarize content
+  * Google Custom Search API
+  * API to summarize content (using Speechmatics API https://www.speechmatics.com)
 
 * Using OAuth 2.0 for account creation and sign-up
 
@@ -43,17 +43,19 @@ user changes without refreshing
   * Integrate OAuth 2.0 authentication flow with Google.
   * Implement basic CRUD operations for user profiles and video uploads.
   * Set-up the third-party APIs
-  * Set up endpoints for video upload and storage.
+  * Set up endpoints for video upload and storing user info.
   * Set up Express server to handle HTTP requests.
+  * The app is able to generate basic slides
 
 * Beta version:
   * Video uploading is working
   * Improved user interface design and add user profile management features.
   * Implement functionality to extract audio from uploaded videos using FFmpeg.
-  * Integrate with Google Cloud Speech-to-Text API to transcribe extracted audio.
+  * Implement transcription
   * The app is able to generate slides from the video.
   * Deployed on a public URL
   * Generated slides include an accompanying script for the speaker
+  * Generated slides include relevant images to the presentation's topics
   * Testing for most functionalities are done
 
 * Final version:
