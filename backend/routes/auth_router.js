@@ -1,5 +1,8 @@
 import { Router } from "express";
 import { OAuth2Client } from "google-auth-library";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const authRouter = Router();
 
@@ -19,6 +22,7 @@ authRouter.post("/signin", async (req, res) => {
       .json({ error: "OAuth2 authorization code is required" });
   }
   try {
+    console.log(code);
     const { tokens } = await client.getToken(code);
 
     // authenticate user
@@ -41,6 +45,7 @@ authRouter.post("/signin", async (req, res) => {
     return res.status(200).json({
       message: "User authenticated",
       user: payload,
+      access_token: tokens.access_token
     });
   } catch (error) {
     console.log(error);
