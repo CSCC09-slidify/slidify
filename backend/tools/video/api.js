@@ -35,8 +35,7 @@ module.sendVideoFromPath = (fileName, path, authToken) => {
 
 module.sendVideoFromFile = (file, authToken) => {
     const form = new FormData();
-    const blob = new Blob([file])
-    form.append("data_file", blob, fileName)
+    form.append("data_file", file)
     form.append("config", JSON.stringify({
         "type": "transcription",
         "transcription_config": { 
@@ -50,7 +49,7 @@ module.sendVideoFromFile = (file, authToken) => {
           "summary_type": "bullets"
         }
       }))
-
+    console.log("Fetching speechmatics")
     return  fetch("https://asr.api.speechmatics.com/v2/jobs/", 
         {
             method: "POST",

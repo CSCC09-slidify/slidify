@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
 import { SlideBuilder } from "./slides/builder.js";
 import slidesApi from "./slides/api.js";
-import { convertTitleToSlides, convertSummaryToSlide, convertSummaryToSpeakerNotes } from "./slides/logic.js";
+import { convertTitleToSlides, convertSummaryToSlide, convertSummaryToSpeakerNotes, addImagesToSlides } from "./slides/logic.js";
 import { convertSpeechmaticsSummary } from "./video/logic.js";
 import videoApi from "./video/api.js";
 import oauthApi from "./oauth/api.js";
+import imagesApi from "./images/api.js";
 
 dotenv.config();
 
@@ -12,7 +13,6 @@ dotenv.config();
 export const convertVideoToSlides = async ({filePath, fileName, file, title, slidesOAuthToken}, next) => {
 
     const checkJobStatus = (id, videoToken, onFinish) => {
-        console.log("Job id is " + id)
         const timeout = setInterval(() => {
             console.log("Checking job " + id)
             videoApi.checkVideoStatus(id, videoToken)
@@ -59,8 +59,21 @@ export const convertVideoToSlides = async ({filePath, fileName, file, title, sli
             const slideId = `slide${i}`;
             convertSummaryToSlide(summarySlideBuilder, s, slideId, i);
             const requests = summarySlideBuilder.buildRequests();
-            console.log("Calling Slides API to build slides from summary")
             await slidesApi.updatePresentation(slidesOAuthToken, presentationId, requests);
+
+            const images = await imagesApi.searchImages({
+                apiKey: process.env.CUSTOM_SEARCH_API_KEY,
+                searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
+                query: s.sectionTitle.slice(2)
+            });
+            for (let im = 0; im < images.length; im++) {
+                const imagesSlideBuilder = SlideBuilder();
+                addImagesToSlides(imagesSlideBuilder, slideId, [images[0]]);
+                const requests = imagesSlideBuilder.buildRequests();
+                const imgRes = await slidesApi.updatePresentation(slidesOAuthToken, presentationId, requests);
+                if (!imgRes.error) break;
+            }
+            console.log("Calling Slides API to build slides from summary")
             console.log("Done slide request " + i)
             const {id} = await slidesApi.getSlideSpeakerNotesId(slidesOAuthToken, presentationId, slideId)
             const speakerNotesSlideBuilder = SlideBuilder();
@@ -80,12 +93,17 @@ export const convertVideoToSlides = async ({filePath, fileName, file, title, sli
     const isValid = await oauthApi.validateToken({authToken: slidesOAuthToken});
     const speechmaticsToken = process.env.SPEECHMATICS_API_KEY;
     if (isValid && speechmaticsToken) {
-        const jobData = file ? 
+        const jobData = !file ? 
             await videoApi.sendVideoFromPath(fileName, filePath, speechmaticsToken) 
             : await videoApi.sendVideoFromFile(file, speechmaticsToken);
         if (jobData.id) {
+            console.log("job id is " + jobData.id)
             checkJobStatus(jobData.id, speechmaticsToken, parseSummary);
+        } else {
+            next({error: jobData})
         }
+    } else {
+        next({error: "Invalid token"})
     }
 
 }

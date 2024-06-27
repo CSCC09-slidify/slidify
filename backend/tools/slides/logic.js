@@ -110,3 +110,16 @@ export const convertSummaryToSpeakerNotes = (slideBuilder, section, speakerNotes
         text: script
     })
 }
+
+export const addImagesToSlides = (slideBuilder, pageId, images) => {
+    images.forEach((img) => {
+        slideBuilder.addImage({
+            pageId,
+            url: img.link,
+            width: 150,
+            height: 80,
+            x: 0,
+            y: 0
+        })
+    })
+}
