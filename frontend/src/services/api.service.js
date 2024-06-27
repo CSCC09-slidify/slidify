@@ -17,4 +17,13 @@ apiService.signIn = function (code) {
   }).then((response) => response.json());
 };
 
+apiService.createSlides = function (title, token, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return fetch(BASE_URL + `/api/slides?accessToken=${token}&title=${title}`, {
+    method: "POST",
+    body: formData,
+  }).then((response) => response.json());
+};
+
 export default apiService;

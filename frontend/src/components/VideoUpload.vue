@@ -21,6 +21,8 @@
   </v-form>
 </template>
 <script>
+import apiService from "@/services/api.service";
+
 export default {
   data: () => ({
     videoFile: null,
@@ -28,6 +30,11 @@ export default {
   methods: {
     handleSubmit() {
       console.log("file uploaded", this.videoFile.name);
+      // TODO: input token and presentation title
+      apiService.createSlides("", "", this.videoFile)
+        .then(res => {
+          console.log(res);
+        })
       this.videoFile = null;
     },
   },
