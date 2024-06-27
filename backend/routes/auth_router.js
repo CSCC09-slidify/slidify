@@ -48,12 +48,15 @@ authRouter.post("/signin", async (req, res) => {
   }
 });
 
-authRouter.get("/slides", async (req, res) => {
-  let authorizationUrl = client.generateAuthUrl({
-    access_type: "offline",
-    scope: "https://www.googleapis.com/auth/presentations",
-    include_granted_scopes: true,
-  });
-  authorizationUrl = authorizationUrl.replace("postmessage", process.env.GOOGLE_REDIRECT_URI);
-  res.redirect(authorizationUrl);
-});
+// authRouter.get("/slides", async (req, res) => {
+//   let authorizationUrl = client.generateAuthUrl({
+//     access_type: "offline",
+//     scope: "https://www.googleapis.com/auth/presentations",
+//     include_granted_scopes: true,
+//   });
+//   authorizationUrl = authorizationUrl.replace(
+//     "postmessage",
+//     process.env.GOOGLE_REDIRECT_URI
+//   );
+//   res.redirect(authorizationUrl);
+// });

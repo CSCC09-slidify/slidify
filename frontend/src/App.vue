@@ -21,7 +21,7 @@
 
 <script>
 import apiService from "@/services/api.service";
-import { googleAuthCodeLogin } from "vue3-google-login";
+import { googleSdkLoaded } from "vue3-google-login";
 
 export default {
   name: "App",
@@ -41,12 +41,20 @@ export default {
   }),
   methods: {
     login() {
-      googleAuthCodeLogin().then((response) => {
-        apiService.signIn(response.code).then((response) => {
-          console.log(response);
-        })
-      }).catch((error) => {
-        console.error("Error logging in with Google:", error);
+      googleSdkLoaded(google => {
+        google.accounts.oauth2.initCodeClient({
+          client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+          scope: "email profile openid https://www.googleapis.com/auth/presentations",
+          redirect_uri: process.env.VUE_APP_GOOGLE_REDIRECT_URI,
+          include_granted_scopes: false,
+          callback: response => {
+            if (response.code) {
+              apiService.signIn(response.code).then((response) => {
+                console.log(response);
+              })
+            }
+          }
+        }).requestCode();
       });
     },
   },
