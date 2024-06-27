@@ -8,7 +8,7 @@
         <router-link to="/" class="text-decoration-none">Slidify</router-link>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <GoogleLogin :callback="handleSignIn" class="mr-2"></GoogleLogin>
+      <v-btn @click="login">Sign in with Google</v-btn>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer">
       <v-list :items="slidesHistory"></v-list>
@@ -21,7 +21,7 @@
 
 <script>
 import apiService from "@/services/api.service";
-// import { decodeCredential } from 'vue3-google-login'
+import { googleAuthCodeLogin } from "vue3-google-login";
 
 export default {
   name: "App",
@@ -40,11 +40,14 @@ export default {
     ],
   }),
   methods: {
-    handleSignIn(response) {
-      // const userData = decodeCredential(response.credential)
-      apiService.signIn(response.credential).then((response) => {
-        console.log(response);
-      })
+    login() {
+      googleAuthCodeLogin().then((response) => {
+        apiService.signIn(response.code).then((response) => {
+          console.log(response);
+        })
+      }).catch((error) => {
+        console.error("Error logging in with Google:", error);
+      });
     },
   },
 };

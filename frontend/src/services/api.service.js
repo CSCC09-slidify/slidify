@@ -5,14 +5,14 @@ const BASE_URL = "http://localhost:3000";
 
 const apiService = {};
 
-apiService.signIn = function (idToken) {
+apiService.signIn = function (code) {
   return fetch(BASE_URL + "/api/auth/signin", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      token: idToken,
+      code: code,
     }),
   }).then((response) => response.json());
 };
