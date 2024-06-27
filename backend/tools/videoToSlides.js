@@ -1,4 +1,3 @@
-import dotenv from "dotenv";
 import { SlideBuilder } from "./slides/builder.js";
 import slidesApi from "./slides/api.js";
 import { convertTitleToSlides, convertSummaryToSlide, convertSummaryToSpeakerNotes, addImagesToSlides } from "./slides/logic.js";
@@ -6,8 +5,6 @@ import { convertSpeechmaticsSummary } from "./video/logic.js";
 import videoApi from "./video/api.js";
 import oauthApi from "./oauth/api.js";
 import imagesApi from "./images/api.js";
-
-dotenv.config();
 
 // returns { presentationId, numSlides }
 export const convertVideoToSlides = async ({filePath, fileName, file, title, slidesOAuthToken}, next) => {
