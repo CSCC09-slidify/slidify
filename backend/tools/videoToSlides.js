@@ -9,7 +9,7 @@ import oauthApi from "./oauth/api.js";
 dotenv.config();
 
 // returns { presentationId, numSlides }
-export const convertVideoToSlides = async ({filePath, fileName, title, slidesOAuthToken}, next) => {
+export const convertVideoToSlides = async ({filePath, fileName, file, title, slidesOAuthToken}, next) => {
 
     const checkJobStatus = (id, videoToken, onFinish) => {
         console.log("Job id is " + id)
@@ -80,7 +80,9 @@ export const convertVideoToSlides = async ({filePath, fileName, title, slidesOAu
     const isValid = await oauthApi.validateToken({authToken: slidesOAuthToken});
     const speechmaticsToken = process.env.SPEECHMATICS_API_KEY;
     if (isValid && speechmaticsToken) {
-        const jobData = await videoApi.sendVideoFromPath(fileName, filePath, speechmaticsToken);
+        const jobData = file ? 
+            await videoApi.sendVideoFromPath(fileName, filePath, speechmaticsToken) 
+            : await videoApi.sendVideoFromFile(file, speechmaticsToken);
         if (jobData.id) {
             checkJobStatus(jobData.id, speechmaticsToken, parseSummary);
         }
