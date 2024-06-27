@@ -1,4 +1,5 @@
 import express from "express";
+import { slidesRouter } from "./routers/slidesRouter.js";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { authRouter } from "./routes/auth_router.js";
@@ -9,7 +10,7 @@ const PORT = 3000;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(express.json());
+
 
 const corsOptions = {
   origin: "http://localhost:8080",
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/api/slides", slidesRouter);
 app.use("/api/auth", authRouter);
 
 app.listen(PORT, (err) => {
