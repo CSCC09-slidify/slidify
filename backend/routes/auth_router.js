@@ -15,6 +15,7 @@ const client = new OAuth2Client({
 
 authRouter.post("/signin", async (req, res) => {
   // an id token
+  console.log(process.env.GOOGLE_CLIENT_ID);
   const code = req.body.code;
   if (!code) {
     return res

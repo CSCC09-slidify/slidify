@@ -72,10 +72,15 @@ export const convertVideoToSlides = async ({filePath, fileName, file, title, sli
             }
             console.log("Calling Slides API to build slides from summary")
             console.log("Done slide request " + i)
-            const {id} = await slidesApi.getSlideSpeakerNotesId(slidesOAuthToken, presentationId, slideId)
-            const speakerNotesSlideBuilder = SlideBuilder();
-            convertSummaryToSpeakerNotes(speakerNotesSlideBuilder, s, id)
-            await slidesApi.updatePresentation(slidesOAuthToken, presentationId, speakerNotesSlideBuilder.buildRequests());
+            try {
+                const {id} = await slidesApi.getSlideSpeakerNotesId(slidesOAuthToken, presentationId, slideId)
+                const speakerNotesSlideBuilder = SlideBuilder();
+                convertSummaryToSpeakerNotes(speakerNotesSlideBuilder, s, id)
+                await slidesApi.updatePresentation(slidesOAuthToken, presentationId, speakerNotesSlideBuilder.buildRequests());
+            } catch (e) {
+                console.log(e);
+            }
+
             console.log("Done speaker notes request " + i);
 
         }
