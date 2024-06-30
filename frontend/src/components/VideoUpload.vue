@@ -2,7 +2,7 @@
   <v-form @submit.prevent="handleSubmit">
     <v-container>
       <v-row class="d-flex align-center">
-        <v-col class="flex-grow-1">
+        <v-col cols="12" md="5" lg="6">
           <v-file-input
             v-model="videoFile"
             label="Upload a video"
@@ -13,30 +13,34 @@
             show-size
           ></v-file-input>
         </v-col>
+        <v-col cols="12" md="4" lg="4">
+          <TextInput label="Presentation Title" v-model="title"/>
+        </v-col>
         <v-col class="flex-grow-0">
-          <v-btn type="submit" :disabled="!videoFile">Generate Slides</v-btn>
+          <v-btn @click="handleSubmit" type="submit" :disabled="!videoFile || !title">Generate Slides</v-btn>
         </v-col>
       </v-row>
     </v-container>
   </v-form>
 </template>
 <script>
-import apiService from "@/services/api.service";
+import TextInput from "./TextInput.vue";
 
 export default {
   data: () => ({
+    title: null,
     videoFile: null,
+    websocket: null
   }),
+  components: {
+    TextInput
+  },
+  props: ["onSubmit"],
   methods: {
     handleSubmit() {
-      console.log("file uploaded", this.videoFile.name);
-      // TODO: input token and presentation title
-      const token = localStorage.getItem("slidify-slides-token");
-      apiService.createSlides(token, "Test slides", this.videoFile)
-        .then(res => {
-          console.log(res);
-        })
+      this.onSubmit(this.videoFile, this.title);
       this.videoFile = null;
+      this.title = null;
     },
   },
 };
