@@ -2,7 +2,7 @@ import express from "express";
 import { slidesRouter } from "./routers/slidesRouter.js";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { authRouter } from "./routes/auth_router.js";
+import { usersRouter } from "./routers/usersRouter.js";
 import { sequelize } from "./datasource.js";
 
 export const app = express();
@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/slides", slidesRouter);
-app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
 
 app.listen(PORT, (err) => {
   if (err) console.log(err);

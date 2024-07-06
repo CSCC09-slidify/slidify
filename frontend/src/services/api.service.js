@@ -6,7 +6,7 @@ const BASE_URL = "http://localhost";
 const apiService = {};
 
 apiService.signIn = function (code) {
-  return fetch(BASE_URL + "/api/auth/signin", {
+  return fetch(BASE_URL + "/api/users/signin", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

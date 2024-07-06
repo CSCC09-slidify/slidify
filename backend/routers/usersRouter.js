@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const authRouter = Router();
+export const usersRouter = Router();
 
 const client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
@@ -14,7 +14,7 @@ const client = new OAuth2Client({
   redirectUri: "postmessage",
 });
 
-authRouter.post("/signin", async (req, res) => {
+usersRouter.post("/signin", async (req, res) => {
   // an id token
   console.log(process.env.GOOGLE_CLIENT_ID);
   const code = req.body.code;
@@ -65,7 +65,7 @@ authRouter.post("/signin", async (req, res) => {
   }
 });
 
-// authRouter.get("/slides", async (req, res) => {
+// usersRouter.get("/slides", async (req, res) => {
 //   let authorizationUrl = client.generateAuthUrl({
 //     access_type: "offline",
 //     scope: "https://www.googleapis.com/auth/presentations",
