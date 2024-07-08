@@ -31,8 +31,7 @@ export default {
     handleSubmit() {
       console.log("file uploaded", this.videoFile.name);
       // TODO: input token and presentation title
-      const token = localStorage.getItem("slidify-slides-token");
-      apiService.createSlides(token, "Test slides", this.videoFile)
+      apiService.createSlides("Test slides", this.videoFile)
         .then(res => {
           console.log(res);
         })

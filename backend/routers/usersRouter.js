@@ -16,7 +16,6 @@ const client = new OAuth2Client({
 
 usersRouter.post("/signin", async (req, res) => {
   // an id token
-  console.log(process.env.GOOGLE_CLIENT_ID);
   const code = req.body.code;
   if (!code) {
     return res
@@ -24,7 +23,6 @@ usersRouter.post("/signin", async (req, res) => {
       .json({ error: "OAuth2 authorization code is required" });
   }
   try {
-    console.log(code);
     const { tokens } = await client.getToken(code);
 
     // authenticate user
@@ -32,13 +30,6 @@ usersRouter.post("/signin", async (req, res) => {
       idToken: tokens.id_token,
     });
     const payload = ticket.getPayload();
-
-    /*
-    TODO:
-    - check if user already in database
-    - if so, establish a session
-    - otherwise, create a new user record and establish a session
-    */
 
     // use this as unique identifier for the user
     const userId = payload["sub"];
@@ -50,19 +41,37 @@ usersRouter.post("/signin", async (req, res) => {
       });
     }
 
-    console.log(user.toJSON());
-
     client.setCredentials({ access_token: tokens.access_token });
+    req.session.userId = user.userId;
+    // TODO: encrypt
+    req.session.accessToken = tokens.access_token;
+    req.session.refreshToken = tokens.refresh_token;
 
-    return res.status(200).json({
-      message: "User authenticated",
-      user: payload,
-      access_token: tokens.access_token
+    return res.json({
+      userId: user.userId,
+      name: user.name,
     });
   } catch (error) {
     console.log(error);
     return res.status(401).json({ error: "Invalid authorization code" });
   }
+});
+
+usersRouter.get("/whoami", async (req, res) => {
+  // check if user is authenticated
+  if (!req.session.userId) {
+    return res.status(401).json({
+      error: "User not authenticated",
+    });
+  }
+  // find user in database
+  const user = await User.findByPk(req.session.userId);
+  if (!user) {
+    return res.status(401).json({
+      error: "User not authenticated",
+    });
+  }
+  return res.json(user);
 });
 
 // usersRouter.get("/slides", async (req, res) => {

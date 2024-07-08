@@ -10,13 +10,13 @@ slidesRouter.post("/", upload.single("file"), async (req, res) => {
     console.log("file is")
     console.log(req.file);
     const file = req.file;
-    const { title, accessToken } = req.query;
+    const { title } = req.query;
     convertVideoToSlides(
         {
             filePath: file.path,
             fileName: file.filename,
             title,
-            slidesOAuthToken: accessToken
+            slidesOAuthToken: req.session.accessToken
         },
         (r) => {
             res.json(r);

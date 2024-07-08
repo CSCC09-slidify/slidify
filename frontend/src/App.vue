@@ -51,7 +51,6 @@ export default {
             if (response.code) {
               apiService.signIn(response.code).then((response) => {
                 console.log(response);
-                localStorage.setItem("slidify-slides-token", response.access_token);
               })
             }
           }

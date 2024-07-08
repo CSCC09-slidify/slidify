@@ -1,4 +1,6 @@
 import express from "express";
+import session from "express-session";
+import sequelizeStore from "connect-session-sequelize";
 import { slidesRouter } from "./routers/slidesRouter.js";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -22,11 +24,29 @@ try {
   console.error("Unable to connect to the database:", error);
 }
 
-const corsOptions = {
-  origin: "http://localhost",
-  credentials: true,
-};
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "http://localhost",
+    credentials: true,
+  })
+);
+
+const sequelizeSessionStore = sequelizeStore(session.Store);
+const sessionStore = new sequelizeSessionStore({
+  db: sequelize,
+  tableName: "Session",
+});
+app.use(
+  session({
+    secret: process.env.SLIDIFY_SESSION_SECRET,
+    proxy: true,
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: { secure: false },
+  })
+);
+sessionStore.sync();
 
 app.use((req, res, next) => {
   console.log("HTTP request", req.method, req.url, req.body);
