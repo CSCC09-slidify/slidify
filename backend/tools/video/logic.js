@@ -64,7 +64,7 @@ export const convertSpeechmaticsSummary = (resp) => {
         const mergeLength = Math.ceil(extra / convertedSummary.length);
         for (let i = 0; i < extra; i++) {
             chapters[i].end_time = chapters[i + mergeLength].end_time;
-            chapters.splice(i + 1, 1);
+            chapters.splice(i + 1, mergeLength);
         }
     }
     const transcription = resp.results;
