@@ -1,6 +1,8 @@
 import { SlideBuilder } from "./slides/builder.js";
 import slidesApi from "./slides/api.js";
-import { convertTitleToSlides, convertSummaryToSlide, convertSummaryToSpeakerNotes, addImagesToSlides } from "./slides/logic.js";
+import { convertTitleToSlides, 
+    convertSummaryToSlide, convertSummaryToSpeakerNotes, 
+    addImagesReferenceList, addImagesToSlides } from "./slides/logic.js";
 import { convertSpeechmaticsSummary } from "./video/logic.js";
 import videoApi from "./video/api.js";
 import oauthApi from "./oauth/api.js";
@@ -68,53 +70,66 @@ export const parseSummary = async (data, slidesOAuthToken, title, updateStatus, 
     if (!presentationId) {
         return next({error: "Error creating presentation"});
     }
-    presentationIdReady(presentationId);
-    console.log("Presentation id is " + presentationId )
-    updateStatus("Building Slides");
-    const slideBuilder = SlideBuilder();
-    convertTitleToSlides(slideBuilder, title)
-    await slidesApi.updatePresentation(slidesOAuthToken, presentationId, slideBuilder.buildRequests());
-    slideReady("p");
-    for (let i = 0; i < summary.length; i++) {
-        updateStatus("Building Slide #" + (i+1));
-        const s = summary[i];
-        const summarySlideBuilder = SlideBuilder();
-        const slideId = `slide${i}`;
-        convertSummaryToSlide(summarySlideBuilder, s, slideId, i);
-        const requests = summarySlideBuilder.buildRequests();
-        await slidesApi.updatePresentation(slidesOAuthToken, presentationId, requests);
-
-        const images = await imagesApi.searchImages({
-            apiKey: process.env.CUSTOM_SEARCH_API_KEY,
-            searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
-            query: s.sectionTitle.slice(2)
+    try {
+        presentationIdReady(presentationId);
+        console.log("Presentation id is " + presentationId )
+        updateStatus("Building Slides");
+        const slideBuilder = SlideBuilder();
+        convertTitleToSlides(slideBuilder, title)
+        await slidesApi.updatePresentation(slidesOAuthToken, presentationId, slideBuilder.buildRequests());
+        slideReady("p");
+        const imagesUsed = []
+        for (let i = 0; i < summary.length; i++) {
+            updateStatus("Building Slide #" + (i+1));
+            const s = summary[i];
+            const summarySlideBuilder = SlideBuilder();
+            const slideId = `slide${i}`;
+            convertSummaryToSlide(summarySlideBuilder, s, slideId, i);
+            const requests = summarySlideBuilder.buildRequests();
+            await slidesApi.updatePresentation(slidesOAuthToken, presentationId, requests);
+    
+            const images = await imagesApi.searchImages({
+                apiKey: process.env.CUSTOM_SEARCH_API_KEY,
+                searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
+                query: s.sectionTitle.slice(2)
+            });
+            for (let im = 0; im < images.length; im++) {
+                const imagesSlideBuilder = SlideBuilder();
+                addImagesToSlides(imagesSlideBuilder, slideId, [images[0]]);
+                const requests = imagesSlideBuilder.buildRequests();
+                const imgRes = await slidesApi.updatePresentation(slidesOAuthToken, presentationId, requests);
+                if (!imgRes.error) {
+                    imagesUsed.push(images[0]);
+                    break;
+                }
+            }
+            console.log("Calling Slides API to build slides from summary")
+            console.log("Done slide request " + i)
+            try {
+                const {id} = await slidesApi.getSlideSpeakerNotesId(slidesOAuthToken, presentationId, slideId)
+                const speakerNotesSlideBuilder = SlideBuilder();
+                convertSummaryToSpeakerNotes(speakerNotesSlideBuilder, s, id)
+                await slidesApi.updatePresentation(slidesOAuthToken, presentationId, speakerNotesSlideBuilder.buildRequests());
+            } catch (e) {
+                console.log(e);
+            }
+            slideReady(slideId);
+            console.log("Done speaker notes request " + i);
+    
+        }
+        const imageReferencesBuilder = SlideBuilder();
+        addImagesReferenceList(imageReferencesBuilder, imagesUsed, "imageReferencesSlide");
+        await slidesApi.updatePresentation(slidesOAuthToken, presentationId, imageReferencesBuilder.buildRequests());
+        slideReady("imageReferencesSlide");
+        updateStatus("Finishing");
+        next({
+            presentationId,
+            numSlides: summary.length + 1
         });
-        for (let im = 0; im < images.length; im++) {
-            const imagesSlideBuilder = SlideBuilder();
-            addImagesToSlides(imagesSlideBuilder, slideId, [images[0]]);
-            const requests = imagesSlideBuilder.buildRequests();
-            const imgRes = await slidesApi.updatePresentation(slidesOAuthToken, presentationId, requests);
-            if (!imgRes.error) break;
-        }
-        console.log("Calling Slides API to build slides from summary")
-        console.log("Done slide request " + i)
-        try {
-            const {id} = await slidesApi.getSlideSpeakerNotesId(slidesOAuthToken, presentationId, slideId)
-            const speakerNotesSlideBuilder = SlideBuilder();
-            convertSummaryToSpeakerNotes(speakerNotesSlideBuilder, s, id)
-            await slidesApi.updatePresentation(slidesOAuthToken, presentationId, speakerNotesSlideBuilder.buildRequests());
-        } catch (e) {
-            console.log(e);
-        }
-        slideReady(slideId);
-        console.log("Done speaker notes request " + i);
-
+    } catch (e) {
+        console.log(e);
+        next({error: "There was an error building the slides"})
     }
-    updateStatus("Finishing");
-    next({
-        presentationId,
-        numSlides: summary.length + 1
-    });
     
 }
 

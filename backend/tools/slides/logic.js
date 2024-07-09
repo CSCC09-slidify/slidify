@@ -1,8 +1,8 @@
 const SLIDE_WIDTH = 720;
 const SLIDE_HEIGHT = 405;
-const HEADER_FONT_SIZE = 40;
+const HEADER_FONT_SIZE = 38;
 const HEADER_FONT_FAMILY = "Montserrat"
-const BULLET_FONT_SIZE = 18;
+const BULLET_FONT_SIZE = 14;
 const BULLET_FONT_FAMILY = "Montserrat"
 
 export const convertTitleToSlides = (slideBuilder, title) => {
@@ -53,9 +53,9 @@ export const convertSummaryToSlides = (slideBuilder, summary) => {
                fontFamily: BULLET_FONT_FAMILY,
             },
             paragraphStyle: {
-                alignment: "CENTER"
+                alignment: "START"
             },
-            width: SLIDE_WIDTH - 40,
+            width: (SLIDE_WIDTH - 40) / 2,
             height: 300,
             x: 20,
             y: 150,
@@ -92,9 +92,9 @@ export const convertSummaryToSlide = (slideBuilder, section, slideId, index) => 
             fontFamily: BULLET_FONT_FAMILY,
         },
         paragraphStyle: {
-            alignment: "CENTER"
+            alignment: "START"
         },
-        width: SLIDE_WIDTH - 40,
+        width: (SLIDE_WIDTH - 40) / 2,
         height: 300,
         x: 20,
         y: 150,
@@ -112,14 +112,74 @@ export const convertSummaryToSpeakerNotes = (slideBuilder, section, speakerNotes
 }
 
 export const addImagesToSlides = (slideBuilder, pageId, images) => {
-    images.forEach((img) => {
+    for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        const {width, height} = img.image;
+        const displayWidth = (SLIDE_WIDTH - 40) / 2;
+        const displayHeight = (SLIDE_HEIGHT) - 150 - 20;
+        const useHeight = height / displayHeight > width / displayWidth;
         slideBuilder.addImage({
             pageId,
             url: img.link,
-            width: 150,
-            height: 80,
-            x: 0,
-            y: 0
+            width: useHeight ? width / (height / displayHeight) : displayWidth,
+            height: useHeight ? displayHeight : height / (width / displayWidth),
+            x: 30 + (SLIDE_WIDTH - 40) / 2,
+            y: 150
         })
+    }
+}
+
+export const addImagesReferenceList = (slideBuilder, images, slideId) => {
+    slideBuilder.createSlide({ id: slideId });
+    slideBuilder.addText({
+        id: "imageReferencesHeader",
+        text: "Images Reference List",
+        style: {
+            fontSize: HEADER_FONT_SIZE,
+            fontFamily: HEADER_FONT_FAMILY,
+        },
+        paragraphStyle: {
+            alignment: "CENTER"
+        },
+        width: SLIDE_WIDTH - 40,
+        height: 60,
+        x: 20,
+        y: 20,
+        pageId: slideId
     })
+    const italicized = []
+    const referenceTextList = images.reduce((acc, img) => {
+        const title = img.title;
+        const url = img.link
+        italicized.push({start: acc.length, end: acc.length + title.length});  
+        return acc + `${title} [Digital Image]. ${url}\n`
+    }, "").trim();
+    slideBuilder.addText({
+        id: "imageReferences",
+        text: referenceTextList,
+        style: {
+            fontSize: 12,
+            fontFamily: BULLET_FONT_FAMILY,
+        },
+        paragraphStyle: {
+            alignment: "START"
+        },
+        width: (SLIDE_WIDTH - 40),
+        height: SLIDE_HEIGHT - 80,
+        x: 20,
+        y: 80,
+        pageId: slideId
+    })
+
+    italicized.forEach(item => slideBuilder.changeTextStyle({
+        id: "imageReferences",
+        style: {
+            italic: true,
+        },
+        textRange: {
+            startIndex: item.start,
+            endIndex: item.end,
+            type: "FIXED_RANGE"    
+        }
+    }))
 }
