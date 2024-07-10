@@ -10,7 +10,7 @@ import imagesApi from "./images/api.js";
 
 // returns { presentationId, numSlides }
 export const convertVideoToSlides = async (
-    {filePath, fileName, file, title, slidesOAuthToken}, updateStatus, presentationIdReady, slideReady, next) => {
+    {filePath, fileName, file, title, slidesOAuthToken}, updateStatus, presentationIdReady, slideReady, scriptReady, next) => {
 
     // Polling to check job status
     const checkJobStatus = (id, videoToken) => {
@@ -31,7 +31,7 @@ export const convertVideoToSlides = async (
                     clearInterval(timeout);
                     videoApi.getVideoSummary(id, videoToken)
                     .then(results => {
-                        parseSummary(results, slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, next);
+                        parseSummary(results, slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, scriptReady, next);
                     })
                 } else {
                     console.log("Job rejected")
@@ -61,7 +61,7 @@ export const convertVideoToSlides = async (
 
 }
 
-export const parseSummary = async (data, slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, next) => {
+export const parseSummary = async (data, slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, scriptReady, next) => {
     const summary = convertSpeechmaticsSummary(data);
     const {presentationId} = await slidesApi.createPresentation({
         authToken: slidesOAuthToken,
@@ -108,7 +108,8 @@ export const parseSummary = async (data, slidesOAuthToken, title, updateStatus, 
             try {
                 const {id} = await slidesApi.getSlideSpeakerNotesId(slidesOAuthToken, presentationId, slideId)
                 const speakerNotesSlideBuilder = SlideBuilder();
-                convertSummaryToSpeakerNotes(speakerNotesSlideBuilder, s, id)
+                const script = convertSummaryToSpeakerNotes(speakerNotesSlideBuilder, s, id)
+                scriptReady(slideId, script);
                 await slidesApi.updatePresentation(slidesOAuthToken, presentationId, speakerNotesSlideBuilder.buildRequests());
             } catch (e) {
                 console.log(e);

@@ -1,8 +1,18 @@
 <template>
   <VideoUpload :on-submit="submitVideo"/>
   <ErrorMessage v-if="error.hasError" :message="error.message"/>
-  <GoogleSlides :slide-ids="presentation.slideIds" :presentation-id="presentation.presentationId"/>
-  <LoadingSpinner v-if="isLoading" :loading-message="loadingMessage"/>
+  <v-row class="align-center justify-center pa-4">
+    <v-col cols="12" md="8" lg="8" v-if="presentation.presentationId">
+      <GoogleSlides :slide-ids="presentation.slideIds" 
+                    :presentation-title="presentation.presentationTitle" 
+                    :presentation-id="presentation.presentationId"
+                    :slide-scripts="presentation.slideScripts"
+      />
+    </v-col>
+    <v-col  v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12" :lg="presentation.presentationId ? 4 : 12">
+      <LoadingSpinner :loading-message="loadingMessage"/>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
@@ -29,8 +39,10 @@ export default {
       message: ""
     },
     presentation: {
-      presentationId: null,
-      slideIds: []
+      presentationId: "",
+      presentationTitle: null,
+      slideIds: [],
+      slideScripts: {}
     }
   }),
   methods: {
@@ -42,10 +54,13 @@ export default {
       this.error.hasError = false;
       this.presentation = {
         presentation: null,
-        slideIds: []
+        presentationTitle: "",
+        slideIds: [],
+        slideScripts: {}
       },
       apiService.createSlides(token, title, video)
         .then(job => {
+          this.presentation.presentationTitle = title;
           if (job.id) {
             // TODO: Move URL to .env
             this.websocket = new io("http://localhost:3000")
@@ -57,6 +72,7 @@ export default {
                   message: res.error
                 }
               }
+              console.log(this.presentation.slideScripts)
             })
 
             this.websocket.on(`slides/${job.id}/status`, (status) => {
@@ -65,6 +81,10 @@ export default {
 
             this.websocket.on(`slides/${job.id}/slideReady`, (slideId) => {
               this.presentation.slideIds.push(slideId);
+            })
+
+            this.websocket.on(`slides/${job.id}/scriptReady`, ({slideId, script}) => {
+              this.presentation.slideScripts[slideId] = script;
             })
 
             this.websocket.on(`slides/${job.id}/presentationId`, (presentationId) => {

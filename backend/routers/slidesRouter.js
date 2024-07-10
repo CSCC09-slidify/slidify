@@ -27,6 +27,9 @@ slidesRouter.post("/", upload.single("file"), async (req, res) => {
         (slideId) => {
             req.io.emit(`slides/${jobId}/slideReady`, slideId);
         }, 
+        (slideId, script) => {
+            req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
+        }, 
         (r) => {
             req.io.emit(`slides/${jobId}/done`, r);
         }

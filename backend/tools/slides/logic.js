@@ -109,6 +109,7 @@ export const convertSummaryToSpeakerNotes = (slideBuilder, section, speakerNotes
         id: speakerNotesObjectId,
         text: script
     })
+    return script
 }
 
 export const addImagesToSlides = (slideBuilder, pageId, images) => {
