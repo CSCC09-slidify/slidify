@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { User } from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
 import dotenv from "dotenv";
 
@@ -31,8 +32,6 @@ authRouter.post("/signin", async (req, res) => {
       idToken: tokens.id_token,
     });
     const payload = ticket.getPayload();
-    // use this as unique identifier for the user
-    // const userId = payload["sub"];
 
     /*
     TODO:
@@ -40,6 +39,18 @@ authRouter.post("/signin", async (req, res) => {
     - if so, establish a session
     - otherwise, create a new user record and establish a session
     */
+
+    // use this as unique identifier for the user
+    const userId = payload["sub"];
+    let user = await User.findOne({ where: { userId } });
+    if (!user) {
+      user = await User.create({
+        userId: userId,
+        name: payload["name"],
+      });
+    }
+
+    console.log(user.toJSON());
 
     client.setCredentials({ access_token: tokens.access_token });
 

@@ -6,6 +6,7 @@ import { authRouter } from "./routes/auth_router.js";
 import { registerIOListeners } from "./sockets.js";
 import { Server } from "socket.io";
 import http from "http";
+import { sequelize } from "./datasource.js";
 
 export const app = express();
 const httpServer = http.createServer(app);
@@ -15,6 +16,15 @@ const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+try {
+  await sequelize.authenticate();
+  // Automatically detect all of your defined models and create (or modify) the tables for you.
+  // This is not recommended for production-use, but that is a topic for a later time!
+  await sequelize.sync({ alter: { drop: false } });
+  console.log("Connection has been established successfully.");
+} catch (error) {
+  console.error("Unable to connect to the database:", error);
+}
 
 const corsOptions = {
   origin: ["http://localhost:8080"],
