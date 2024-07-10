@@ -7,10 +7,10 @@ const upload = multer({ dest: 'uploads/' })
 export const slidesRouter = Router();
 
 slidesRouter.post("/", upload.single("file"), async (req, res) => {
-    console.log("file is")
-    console.log(req.file);
     const file = req.file;
     const { title, accessToken } = req.query;
+    // TODO: store jobs and generate IDs elsewhere
+    const jobId = Date.now() + "$" + Math.random();
     convertVideoToSlides(
         {
             filePath: file.path,
@@ -18,8 +18,21 @@ slidesRouter.post("/", upload.single("file"), async (req, res) => {
             title,
             slidesOAuthToken: accessToken
         },
+        (statusMessage) => {
+            req.io.emit(`slides/${jobId}/status`, statusMessage);
+        }, 
+        (presentationId) => {
+            req.io.emit(`slides/${jobId}/presentationId`, presentationId);
+        }, 
+        (slideId) => {
+            req.io.emit(`slides/${jobId}/slideReady`, slideId);
+        }, 
+        (slideId, script) => {
+            req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
+        }, 
         (r) => {
-            res.json(r);
+            req.io.emit(`slides/${jobId}/done`, r);
         }
     );
+    return res.json({msg: "Job started", id: jobId});
 })

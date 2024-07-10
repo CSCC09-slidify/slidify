@@ -163,6 +163,17 @@ export function SlideBuilder () {
         })
     }
 
+    const changeTextStyle = ({id = "a" + parseInt(Math.random().toString() * 1000000), style, textRange}) => {
+        requests.push({
+            updateTextStyle: {
+                objectId: id,
+                style: font(style),
+                textRange,
+                fields: "*"
+            }
+        });
+    }
+
     const addSpeakerNotes = ({id = "a" + parseInt(Math.random().toString() * 1000000), text}) => {
         requests.push({
             insertText: {
@@ -180,6 +191,7 @@ export function SlideBuilder () {
         addText,
         addBulletsText,
         addSpeakerNotes,
+        changeTextStyle,
         addVideo: () => {},
         addLine: () => {},
         buildRequests: () => {
