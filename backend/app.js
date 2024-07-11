@@ -1,13 +1,17 @@
 import express from "express";
 import session from "express-session";
 import sequelizeStore from "connect-session-sequelize";
+import { sequelize } from "./datasource.js";
 import { slidesRouter } from "./routers/slidesRouter.js";
+import { usersRouter } from "./routers/usersRouter.js";
+import { registerIOListeners } from "./sockets.js";
+import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { usersRouter } from "./routers/usersRouter.js";
-import { sequelize } from "./datasource.js";
+import http from "http";
 
 export const app = express();
+const httpServer = http.createServer(app);
 
 const PORT = 3000;
 
@@ -24,12 +28,11 @@ try {
   console.error("Unable to connect to the database:", error);
 }
 
-app.use(
-  cors({
-    origin: "http://localhost",
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: ["http://localhost"],
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 const sequelizeSessionStore = sequelizeStore(session.Store);
 const sessionStore = new sequelizeSessionStore({
@@ -48,15 +51,19 @@ app.use(
 );
 sessionStore.sync();
 
+export const io = new Server(httpServer, { cors: corsOptions });
+registerIOListeners(io);
+
 app.use((req, res, next) => {
   console.log("HTTP request", req.method, req.url, req.body);
+  req.io = io;
   next();
 });
 
 app.use("/api/slides", slidesRouter);
 app.use("/api/users", usersRouter);
 
-app.listen(PORT, (err) => {
+httpServer.listen(PORT, (err) => {
   if (err) console.log(err);
   else console.log("HTTP server on http://localhost:%s", PORT);
 });
