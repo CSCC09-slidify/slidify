@@ -33,4 +33,11 @@ apiService.whoami = function () {
   }).then((response) => response.json());
 }
 
+apiService.signOut = function () {
+  return fetch(BASE_URL + "/api/users/signout", {
+    method: "POST",
+    credentials: "include",
+  }).then((response) => response.json());
+}
+
 export default apiService;

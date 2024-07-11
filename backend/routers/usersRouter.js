@@ -57,6 +57,18 @@ usersRouter.post("/signin", async (req, res) => {
   }
 });
 
+usersRouter.post("/signout", async (req, res) => {
+  // TODO: revoke tokens ?
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Failed to destroy session:", err);
+      return res.status(500).json({ error: "Failed to sign out" });
+    }
+    res.clearCookie("connect.sid");
+    return res.json({ message: "Signed out successfully" });
+  });
+});
+
 usersRouter.get("/whoami", async (req, res) => {
   // check if user is authenticated
   if (!req.session.userId) {
@@ -71,7 +83,10 @@ usersRouter.get("/whoami", async (req, res) => {
       error: "User not authenticated",
     });
   }
-  return res.json(user);
+  return res.json({
+    userId: user.userId,
+    name: user.name,
+  });
 });
 
 // usersRouter.get("/slides", async (req, res) => {
