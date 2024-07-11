@@ -49,7 +49,6 @@ export default {
     submitVideo(video, title) {
       console.log("file uploaded", video.name);
       // TODO: input token
-      const token = localStorage.getItem("slidify-slides-token");
       this.isLoading = true;
       this.error.hasError = false;
       this.presentation = {
@@ -58,7 +57,7 @@ export default {
         slideIds: [],
         slideScripts: {}
       },
-      apiService.createSlides(token, title, video)
+      apiService.createSlides(title, video)
         .then(job => {
           this.presentation.presentationTitle = title;
           if (job.id) {

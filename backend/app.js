@@ -1,12 +1,14 @@
 import express from "express";
+import session from "express-session";
+import sequelizeStore from "connect-session-sequelize";
+import { sequelize } from "./datasource.js";
 import { slidesRouter } from "./routers/slidesRouter.js";
-import bodyParser from "body-parser";
-import cors from "cors";
-import { authRouter } from "./routes/auth_router.js";
+import { usersRouter } from "./routers/usersRouter.js";
 import { registerIOListeners } from "./sockets.js";
 import { Server } from "socket.io";
+import bodyParser from "body-parser";
+import cors from "cors";
 import http from "http";
-import { sequelize } from "./datasource.js";
 
 export const app = express();
 const httpServer = http.createServer(app);
@@ -27,10 +29,27 @@ try {
 }
 
 const corsOptions = {
-  origin: ["http://localhost:8080"],
+  origin: ["http://localhost"],
   credentials: true,
 };
 app.use(cors(corsOptions));
+
+const sequelizeSessionStore = sequelizeStore(session.Store);
+const sessionStore = new sequelizeSessionStore({
+  db: sequelize,
+  tableName: "Session",
+});
+app.use(
+  session({
+    secret: process.env.SLIDIFY_SESSION_SECRET,
+    proxy: true,
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: { secure: false },
+  })
+);
+sessionStore.sync();
 
 export const io = new Server(httpServer, { cors: corsOptions });
 registerIOListeners(io);
@@ -42,7 +61,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/slides", slidesRouter);
-app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
 
 httpServer.listen(PORT, (err) => {
   if (err) console.log(err);

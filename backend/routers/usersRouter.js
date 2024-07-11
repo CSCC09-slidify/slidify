@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const authRouter = Router();
+export const usersRouter = Router();
 
 const client = new OAuth2Client({
   clientId: process.env.GOOGLE_CLIENT_ID,
@@ -14,9 +14,8 @@ const client = new OAuth2Client({
   redirectUri: "postmessage",
 });
 
-authRouter.post("/signin", async (req, res) => {
+usersRouter.post("/signin", async (req, res) => {
   // an id token
-  console.log(process.env.GOOGLE_CLIENT_ID);
   const code = req.body.code;
   if (!code) {
     return res
@@ -24,7 +23,6 @@ authRouter.post("/signin", async (req, res) => {
       .json({ error: "OAuth2 authorization code is required" });
   }
   try {
-    console.log(code);
     const { tokens } = await client.getToken(code);
 
     // authenticate user
@@ -32,13 +30,6 @@ authRouter.post("/signin", async (req, res) => {
       idToken: tokens.id_token,
     });
     const payload = ticket.getPayload();
-
-    /*
-    TODO:
-    - check if user already in database
-    - if so, establish a session
-    - otherwise, create a new user record and establish a session
-    */
 
     // use this as unique identifier for the user
     const userId = payload["sub"];
@@ -50,14 +41,15 @@ authRouter.post("/signin", async (req, res) => {
       });
     }
 
-    console.log(user.toJSON());
-
     client.setCredentials({ access_token: tokens.access_token });
+    req.session.userId = user.userId;
+    // TODO: encrypt
+    req.session.accessToken = tokens.access_token;
+    req.session.refreshToken = tokens.refresh_token;
 
-    return res.status(200).json({
-      message: "User authenticated",
-      user: payload,
-      access_token: tokens.access_token
+    return res.json({
+      userId: user.userId,
+      name: user.name,
     });
   } catch (error) {
     console.log(error);
@@ -65,7 +57,39 @@ authRouter.post("/signin", async (req, res) => {
   }
 });
 
-// authRouter.get("/slides", async (req, res) => {
+usersRouter.post("/signout", async (req, res) => {
+  // TODO: revoke tokens ?
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Failed to destroy session:", err);
+      return res.status(500).json({ error: "Failed to sign out" });
+    }
+    res.clearCookie("connect.sid");
+    return res.json({ message: "Signed out successfully" });
+  });
+});
+
+usersRouter.get("/whoami", async (req, res) => {
+  // check if user is authenticated
+  if (!req.session.userId) {
+    return res.status(401).json({
+      error: "User not authenticated",
+    });
+  }
+  // find user in database
+  const user = await User.findByPk(req.session.userId);
+  if (!user) {
+    return res.status(401).json({
+      error: "User not authenticated",
+    });
+  }
+  return res.json({
+    userId: user.userId,
+    name: user.name,
+  });
+});
+
+// usersRouter.get("/slides", async (req, res) => {
 //   let authorizationUrl = client.generateAuthUrl({
 //     access_type: "offline",
 //     scope: "https://www.googleapis.com/auth/presentations",

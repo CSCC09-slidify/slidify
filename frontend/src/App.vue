@@ -8,7 +8,8 @@
         <router-link to="/" class="text-decoration-none">Slidify</router-link>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn @click="login">Sign in with Google</v-btn>
+      <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
+      <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
     <v-navigation-drawer v-model="drawer">
       <v-list :items="slidesHistory"></v-list>
@@ -26,6 +27,7 @@ import { googleSdkLoaded } from "vue3-google-login";
 export default {
   name: "App",
   data: () => ({
+    isAuthenticated: false,
     drawer: true,
     // TODO: fetch this dynamically
     slidesHistory: [
@@ -51,13 +53,28 @@ export default {
             if (response.code) {
               apiService.signIn(response.code).then((response) => {
                 console.log(response);
-                localStorage.setItem("slidify-slides-token", response.access_token);
+                this.updateAuthStatus();
               })
             }
           }
         }).requestCode();
       });
     },
+    logout() {
+      apiService.signOut().then((response) => {
+        console.log(response);
+        this.updateAuthStatus();
+      });
+    },
+    updateAuthStatus() {
+      apiService.whoami().then((response) => {
+        this.isAuthenticated = Boolean(response.userId);
+        console.log(response)
+      });
+    },
+  },
+  created() {
+    this.updateAuthStatus();
   },
 };
 </script>

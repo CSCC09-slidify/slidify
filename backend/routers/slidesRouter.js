@@ -8,7 +8,7 @@ export const slidesRouter = Router();
 
 slidesRouter.post("/", upload.single("file"), async (req, res) => {
     const file = req.file;
-    const { title, accessToken } = req.query;
+    const { title } = req.query;
     // TODO: store jobs and generate IDs elsewhere
     const jobId = Date.now() + "$" + Math.random();
     convertVideoToSlides(
@@ -16,7 +16,7 @@ slidesRouter.post("/", upload.single("file"), async (req, res) => {
             filePath: file.path,
             fileName: file.filename,
             title,
-            slidesOAuthToken: accessToken
+            slidesOAuthToken: req.session.accessToken
         },
         (statusMessage) => {
             req.io.emit(`slides/${jobId}/status`, statusMessage);
