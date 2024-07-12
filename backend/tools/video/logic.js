@@ -62,7 +62,7 @@ export const convertSpeechmaticsSummary = (resp) => {
         const extra = chapters.length - convertedSummary.length;
         console.log("there is " + extra + " extra")
         const mergeLength = Math.ceil(extra / convertedSummary.length);
-        for (let i = 0; i < extra; i++) {
+        for (let i = 0; i < extra && i + mergeLength < chapters.length; i++) {
             chapters[i].end_time = chapters[i + mergeLength].end_time;
             chapters.splice(i + 1, mergeLength);
         }
