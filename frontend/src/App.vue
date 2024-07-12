@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar class="px-1" color="white" prominent>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer">
+      <v-app-bar-nav-icon v-if="isAuthenticated" @click.stop="drawer = !drawer">
         <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
       </v-app-bar-nav-icon>
       <v-toolbar-title>
@@ -11,7 +11,7 @@
       <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
       <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer">
+    <v-navigation-drawer v-if="isAuthenticated" v-model="drawer">
       <v-list :items="slidesHistory"></v-list>
     </v-navigation-drawer>
     <v-main>
