@@ -11,8 +11,11 @@
       <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
       <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer">
-      <v-list :items="slidesHistory"></v-list>
+    <v-navigation-drawer v-if="slidesHistory.length > 0"  v-model="drawer" class="py-2">
+      <v-list-item title="My Presentation History" class="font-weight-bold"></v-list-item>
+      <v-divider></v-divider>
+      <v-list-item v-for="item in slidesHistory" :key="item.value" :title="item.title" :to="`/presentations/${item.value}`">
+      </v-list-item>
     </v-navigation-drawer>
     <v-main>
       <router-view></router-view>
@@ -30,17 +33,23 @@ export default {
     isAuthenticated: false,
     drawer: true,
     // TODO: fetch this dynamically
-    slidesHistory: [
-      {
-        title: "Generated Slides 1",
-        value: "slide1",
-      },
-      {
-        title: "Generated Slides 2",
-        value: "slide2",
-      },
-    ],
+    slidesHistory: [],
+    currentSlide: ""
   }),
+  watch: {
+    isAuthenticated: {
+      deep: true,
+      handler(){
+        this.fetchSlidesHistory();
+      }  
+    },
+    drawer: {
+      deep: true,
+      handler(){
+        this.fetchSlidesHistory();    
+      }
+    }
+  },
   methods: {
     login() {
       googleSdkLoaded(google => {
@@ -72,6 +81,18 @@ export default {
         console.log(response)
       });
     },
+    fetchSlidesHistory() {
+      apiService.getSlides().then((response) => {
+        if (response.presentations) {
+          this.slidesHistory = response.presentations.map(p => ({
+            title: p.title,
+            value: p.presentationId
+          }));
+        } else {
+          this.slidesHistory = []
+        }
+      })
+    }
   },
   created() {
     this.updateAuthStatus();
