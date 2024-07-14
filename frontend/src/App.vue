@@ -1,36 +1,34 @@
 <template>
   <v-app>
-    <v-row>
-      <v-navigation-drawer v-model="drawer"
-        class="py-2"
-        :permanent="!$vuetify.display.mobile"
-        :location="$vuetify.display.mobile ? 'bottom' : undefined"
-        :style="{ background: $vuetify.theme.themes.slidifyTheme.colors.surface }"
-      >
-        <SlidesHistory :slidesHistory="slidesHistory"/>
-        <template v-slot:append>
-          <div class="d-flex justify-center pa-2">
-            <v-btn to="/upload" color="primary" rounded="xl" prepend-icon="mdi-plus" class="text-lowercase">
-              create slideshow
-            </v-btn>
-          </div>
-        </template>
-      </v-navigation-drawer>
-      <v-app-bar class="px-1" color="white" prominent>
-        <v-app-bar-nav-icon @click.stop="drawer = !drawer">
-          <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
-        </v-app-bar-nav-icon>
-        <v-toolbar-title>
-          <router-link to="/" class="text-decoration-none">Slidify</router-link>
-        </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
-        <v-btn v-else @click="login">Sign in with Google</v-btn>
-      </v-app-bar>
-      <v-main class="ma-5">
-        <router-view></router-view>
-      </v-main>
-    </v-row>
+    <v-navigation-drawer v-model="drawer"
+      class="py-2"
+      :permanent="!$vuetify.display.mobile"
+      :location="$vuetify.display.mobile ? 'bottom' : undefined"
+      :style="{ background: $vuetify.theme.themes.slidifyTheme.colors.surface }"
+    >
+      <SlidesHistory :slidesHistory="slidesHistory"/>
+      <template v-slot:append>
+        <div class="d-flex justify-center pa-4">
+          <v-btn to="/upload" color="primary" rounded="xl" prepend-icon="mdi-plus" class="text-lowercase w-100">
+            create slideshow
+          </v-btn>
+        </div>
+      </template>
+    </v-navigation-drawer>
+    <v-app-bar class="px-1" color="white" prominent>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer">
+        <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
+      </v-app-bar-nav-icon>
+      <v-toolbar-title>
+        <router-link to="/" class="text-decoration-none">Slidify</router-link>
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
+      <v-btn v-else @click="login">Sign in with Google</v-btn>
+    </v-app-bar>
+    <v-main class="ma-5">
+      <router-view></router-view>
+    </v-main>
   </v-app>
 </template>
 
