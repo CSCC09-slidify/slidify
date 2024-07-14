@@ -1,5 +1,20 @@
 <template>
   <v-app>
+    <v-navigation-drawer v-model="drawer"
+      class="py-2"
+      :permanent="!$vuetify.display.mobile"
+      :location="$vuetify.display.mobile ? 'bottom' : undefined"
+      :style="{ background: $vuetify.theme.themes.slidifyTheme.colors.surface }"
+    >
+      <SlidesHistory :slidesHistory="slidesHistory"/>
+      <template v-slot:append>
+        <div class="d-flex justify-center pa-4">
+          <v-btn to="/upload" color="primary" rounded="xl" prepend-icon="mdi-plus" class="text-lowercase w-100">
+            create slideshow
+          </v-btn>
+        </div>
+      </template>
+    </v-navigation-drawer>
     <v-app-bar class="px-1" color="white" prominent>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer">
         <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
@@ -11,24 +26,22 @@
       <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
       <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
-    <v-navigation-drawer v-if="slidesHistory.length > 0"  v-model="drawer" class="py-2">
-      <v-list-item title="My Presentation History" class="font-weight-bold"></v-list-item>
-      <v-divider></v-divider>
-      <v-list-item v-for="item in slidesHistory" :key="item.value" :title="item.title" :to="`/presentations/${item.value}`">
-      </v-list-item>
-    </v-navigation-drawer>
-    <v-main>
+    <v-main class="ma-5">
       <router-view></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
+import SlidesHistory from "@/components/SlidesHistory.vue";
 import apiService from "@/services/api.service";
 import { googleSdkLoaded } from "vue3-google-login";
 
 export default {
   name: "App",
+  components: {
+    SlidesHistory
+  },
   data: () => ({
     isAuthenticated: false,
     drawer: true,
@@ -84,10 +97,7 @@ export default {
     fetchSlidesHistory() {
       apiService.getSlides().then((response) => {
         if (response.presentations) {
-          this.slidesHistory = response.presentations.map(p => ({
-            title: p.title,
-            value: p.presentationId
-          }));
+          this.slidesHistory = response.presentations;
         } else {
           this.slidesHistory = []
         }
