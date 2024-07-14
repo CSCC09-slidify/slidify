@@ -29,7 +29,7 @@ try {
 }
 
 const corsOptions = {
-  origin: ["http://localhost"],
+  origin: [process.env.CORS_ORIGIN],
   credentials: true,
 };
 app.use(cors(corsOptions));
