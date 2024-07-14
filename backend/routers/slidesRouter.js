@@ -64,7 +64,8 @@ slidesRouter.get("/", validateUserCredentials, async (req, res) => {
                         title: p.title,
                         presentationId: p.presentationId,
                         externalId: p.externalId, 
-                        slideIds
+                        slideIds,
+                        createdAt: p.createdAt
                     }))
         );
         Promise.all(fetchSlides)
@@ -101,7 +102,8 @@ slidesRouter.get("/:presentationId", validateUserCredentials, async (req, res) =
                 presentationId: presentation.presentationId,
                 externalId: presentation.externalId, 
                 slideIds, 
-                slideScripts
+                slideScripts,
+                createdAt: presentation.createdAt
             })
         })
 

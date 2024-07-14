@@ -28,8 +28,8 @@ export default {
   },
   created() {
     const route = useRoute();  
-    watch(() => route.params.id, (newVal) =>  this.fetchPresentationData(newVal));
-    this.fetchPresentationData(route.params.id)
+    watch(() => route.params.presentationId, (newVal) =>  this.fetchPresentationData(newVal));
+    this.fetchPresentationData(route.params.presentationId)
   },
   data: () => ({
     isLoading: false,
