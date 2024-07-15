@@ -9,6 +9,9 @@ import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import cors from "cors";
 import http from "http";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const app = express();
 const httpServer = http.createServer(app);
