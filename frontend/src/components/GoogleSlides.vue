@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <div v-if="presentationId" class="text-h3 my-4">Generated Slides</div>
+      <div v-if="presentationId" class="text-h3 my-4">{{ presentationTitle }}</div>
     </v-row>
     <v-row class="text-h6 mb-4 align-center">
       <a v-if="presentationId" :href="getPresentationUrl(presentationId)" target="blank">

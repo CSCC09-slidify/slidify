@@ -7,7 +7,7 @@
             v-model="videoFile"
             label="Upload a video"
             placeholder="Upload a video"
-            accept="video/*"
+            accept=".aac,.amr,.flac,.m4a,.mp3,.mp4,.mpeg,.ogg,.wav"
             prepend-icon="mdi-video"
             hide-details="auto"
             show-size
