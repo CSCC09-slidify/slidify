@@ -1,18 +1,23 @@
 <template>
   <v-container>
-    <v-row>
+    <v-row class="d-flex align-center">
       <div v-if="presentationId" class="text-h3 my-4">{{ presentationTitle }}</div>
     </v-row>
     <v-row class="text-h6 mb-4 align-center">
-      <a v-if="presentationId" :href="getPresentationUrl(presentationId)" target="blank">
-        <v-icon icon="mdi-link" class="mr-2"></v-icon>
-        <span>Link To Slides</span>
+      <a 
+        v-if="presentationId"
+        :href="getPresentationUrl(presentationId)"
+        target="blank"
+        class="text-decoration-none"
+      >
+        <span>Open in Google Drive</span>
+        <v-icon icon="mdi-open-in-new" class="ml-2"></v-icon>
       </a>
     </v-row>
     <v-row v-if="presentationId" class="align-center justify-center">
       <v-col cols="12">
         <v-card class="pa-4">
-          <v-card-title>"{{ presentationTitle }}" - Slide {{ currentSlide + 1 }}/{{ slideIds.length }}</v-card-title>
+          <v-card-title>Slide {{ currentSlide + 1 }}/{{ slideIds.length }}</v-card-title>
           <v-card-text>
             <v-row class="align-center justify-center">
               <v-btn icon="mdi-chevron-left" density="compact" @click="prevSlide" :disabled="currentSlide <= 0">
