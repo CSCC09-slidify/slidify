@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-list-item class="pa-4" title="History"></v-list-item>
+    <v-divider></v-divider>
     <v-virtual-scroll :items="slidesHistory">
       <template v-slot:default="{ item }">
         <v-list-item class="pa-4"

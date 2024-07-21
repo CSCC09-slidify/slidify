@@ -1,8 +1,7 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer"
-      class="py-2"
-      :permanent="!$vuetify.display.mobile"
+    <v-navigation-drawer 
+      class="d-flex flex-column"
       :location="$vuetify.display.mobile ? 'bottom' : undefined"
       :style="{ background: $vuetify.theme.themes.slidifyTheme.colors.surface }"
     >
@@ -15,10 +14,7 @@
         </div>
       </template>
     </v-navigation-drawer>
-    <v-app-bar class="px-1" color="white" prominent>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer">
-        <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
-      </v-app-bar-nav-icon>
+    <v-app-bar class="px-1" color="white" flat>
       <v-toolbar-title>
         <router-link to="/" class="text-decoration-none">Slidify</router-link>
       </v-toolbar-title>
@@ -52,14 +48,14 @@ export default {
   watch: {
     isAuthenticated: {
       deep: true,
-      handler(){
+      handler() {
         this.fetchSlidesHistory();
-      }  
+      }
     },
     drawer: {
       deep: true,
-      handler(){
-        this.fetchSlidesHistory();    
+      handler() {
+        this.fetchSlidesHistory();
       }
     }
   },
