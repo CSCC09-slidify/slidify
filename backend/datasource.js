@@ -1,6 +1,3 @@
 import { Sequelize } from 'sequelize';
 
-export const sequelize = new Sequelize("db", "user", "password", {
-  host: process.env.DATABASE_URL,
-  dialect: "postgres"
-});
+export const sequelize = new Sequelize(process.env.DATABASE_URL);
