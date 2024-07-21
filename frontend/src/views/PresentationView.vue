@@ -1,6 +1,6 @@
 <template>
-  <v-row class="align-center justify-center pa-4">
-    <v-col cols="12" md="8" lg="8" v-if="presentation.presentationId">
+  <div class="d-flex mx-auto fill-height">
+    <v-col v-if="presentation.presentationId" class="w-100 fill-height">
       <GoogleSlides :slide-ids="presentation.slideIds" 
                     :presentation-title="presentation.presentationTitle" 
                     :presentation-id="presentation.externalId"
@@ -10,7 +10,7 @@
     <v-col v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12" :lg="presentation.presentationId ? 4 : 12">
       <LoadingSpinner loading-message="Fetching presentation"/>
     </v-col>
-  </v-row>
+  </div>
 </template>
 
 <script>
