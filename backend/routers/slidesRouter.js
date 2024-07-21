@@ -2,18 +2,28 @@ import { Router } from "express";
 import multer from "multer";
 import { convertVideoToSlides } from "../tools/videoToSlides.js";
 import { Presentation } from "../models/presentation.js";
-import { validateUserCredentials } from "../middleware/auth.js";
+import { validateUserCredentials, validateNoActiveJobs } from "../middleware/auth.js";
+import { Job } from "../models/job.js";
+import { Notification } from "../models/notification.js";
 import slidesApi from "../tools/slides/api.js";
+import { sendNotification } from "../tools/notifications.js";
 
 const upload = multer({ dest: 'uploads/' })
 
 export const slidesRouter = Router();
 
-slidesRouter.post("/fromVideo", validateUserCredentials, upload.single("file"), async (req, res) => {
+slidesRouter.post("/fromVideo", validateUserCredentials, validateNoActiveJobs, upload.single("file"), async (req, res) => {
     const file = req.file;
     const { title } = req.query;
+    const { userId } = req.session;
     // TODO: store jobs and generate IDs elsewhere
     const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
+    const job = await Job.create({
+        jid: jobId,
+        title,
+        userId,
+        status: "running"
+    });
     convertVideoToSlides(
         {
             filePath: file.path,
@@ -42,7 +52,22 @@ slidesRouter.post("/fromVideo", validateUserCredentials, upload.single("file"), 
                     externalId: presentationId,
                     title
                 })
+                job.status = "done";
+                const notification = await Notification.create({
+                    notificationId: `${userId}#${Date.now().toString()}${Math.floor(Math.random() * 10000)}`,
+                    actorId: userId,
+                    type: "presentation",
+                    content: {
+                        title: `Presentation "${title}" has been created.`,
+                        presentationId: jobId                
+                    },
+                    status: 1
+                })
+                sendNotification(userId, req.io, notification);
+            } else {
+                job.status = "error";
             }
+            await job.save()
             req.io.emit(`slides/${jobId}/done`, r);
         }
     );
@@ -107,4 +132,25 @@ slidesRouter.get("/:presentationId", validateUserCredentials, async (req, res) =
             })
         })
 
+})
+
+slidesRouter.get("/jobs/active", validateUserCredentials, async (req, res) => {
+    const userId = req.session.userId;
+    const activeJobs = await Job.findAll({
+        where: {
+            userId: userId,
+            status: "running"
+        }
+    })
+    return res.json({ jobs: activeJobs })
+})
+
+// For debugging
+slidesRouter.get("/jobs/deleteAllRunning", async (req, res) => {
+    await Job.destroy({
+        where: {
+            status: "running"
+        }
+    })
+    return res.status(204).json({ message: "Deleted" })
 })
