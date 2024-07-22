@@ -32,7 +32,7 @@
       <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
       <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
-    <v-main>
+    <v-main class="p-5">
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -172,7 +172,7 @@ export default {
                 })
         }
     },
-    displayLogin(route) {
+    displayLogin(route = this.$route) {
       const previousValue = this.isAuthenticated;
       this.updateAuthStatus(
         () => {
