@@ -1,5 +1,5 @@
 <template>
-  <v-row class="align-center justify-center pa-4">
+  <v-row class="align-center justify-center p-4">
     <v-col cols="12" md="8" lg="8" v-if="presentation.presentationId">
       <GoogleSlides :slide-ids="presentation.slideIds" 
                     :presentation-title="presentation.presentationTitle" 

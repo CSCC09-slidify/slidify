@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import PresentationView from "../views/PresentationView.vue";
 import MainLayoutView from "../views/MainLayoutView.vue";
+import LandingView from "../views/LandingView.vue";
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -18,6 +20,11 @@ const router = createRouter({
           path: "/presentations/:presentationId",
           name: "presentation",
           component: PresentationView,
+        },
+        {
+          path: "/",
+          name: "landing",
+          component: LandingView,
         },
       ]
     }

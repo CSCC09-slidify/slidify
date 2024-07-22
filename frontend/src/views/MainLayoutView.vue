@@ -2,7 +2,7 @@
   <v-app>
     <UserSessionModal v-if="loginRequired == 'session'" :onSignIn="reload" header="Session Expired" headerIcon="mdi-clock-outline" body="To continue, click the button below to sign in, or return to the homepage." />
     <UserSessionModal v-if="loginRequired == 'signout'" :onSignIn="reload" header="Sign In" headerIcon="mdi-account"  body="You must be signed in to view this page." />
-    <v-navigation-drawer v-model="drawer"
+    <v-navigation-drawer v-if="isAuthenticated" v-model="drawer"
       class="py-2"
       :permanent="!$vuetify.display.mobile"
       :location="$vuetify.display.mobile ? 'bottom' : undefined"
@@ -17,7 +17,7 @@
         </div>
       </template>
     </v-navigation-drawer>
-    <v-app-bar class="px-1" color="white" prominent>
+    <v-app-bar class="px-1" color="white" prominent v-if="isAuthenticated">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer">
         <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
       </v-app-bar-nav-icon>
@@ -32,7 +32,7 @@
       <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
       <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
-    <v-main class="ma-5">
+    <v-main class="p-5">
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -65,7 +65,8 @@ export default {
       content: []
     },
     waitingForPresentation: false,
-    loginRequired: "none"
+    loginRequired: "none",
+    showMainLayout: false
   }),
   watch: {
     isAuthenticated: {
@@ -75,6 +76,7 @@ export default {
         if (this.isAuthenticated) {
             this.fetchNotifications();
             this.watchNotifications();
+            this.showMainLayout = this.$route.name == "landing"
         } else {
             this.slidesHistory = []
             this.notification = {
@@ -83,6 +85,7 @@ export default {
                 content: []
             }
             this.waitingForPresentation = false;
+            this.showMainLayout = false;
         }
       }  
     },
@@ -169,7 +172,7 @@ export default {
                 })
         }
     },
-    displayLogin(route) {
+    displayLogin(route = this.$route) {
       const previousValue = this.isAuthenticated;
       this.updateAuthStatus(
         () => {
