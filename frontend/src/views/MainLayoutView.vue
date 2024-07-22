@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer"
+    <v-navigation-drawer v-if="isAuthenticated" v-model="drawer"
       class="py-2"
       :permanent="!$vuetify.display.mobile"
       :location="$vuetify.display.mobile ? 'bottom' : undefined"
@@ -15,7 +15,7 @@
         </div>
       </template>
     </v-navigation-drawer>
-    <v-app-bar class="px-1" color="white" prominent>
+    <v-app-bar class="px-1" color="white" prominent v-if="isAuthenticated">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer">
         <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
       </v-app-bar-nav-icon>
@@ -30,7 +30,7 @@
       <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
       <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
-    <v-main class="ma-5">
+    <v-main>
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -60,7 +60,8 @@ export default {
       isOpen: false,
       content: []
     },
-    waitingForPresentation: false
+    waitingForPresentation: false,
+    showMainLayout: false
   }),
   watch: {
     isAuthenticated: {
@@ -70,6 +71,7 @@ export default {
         if (this.isAuthenticated) {
             this.fetchNotifications();
             this.watchNotifications();
+            this.showMainLayout = this.$route.name == "landing"
         } else {
             this.slidesHistory = []
             this.notification = {
@@ -78,6 +80,7 @@ export default {
                 content: []
             }
             this.waitingForPresentation = false;
+            this.showMainLayout = false;
         }
       }  
     },

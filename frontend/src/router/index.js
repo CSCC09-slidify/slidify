@@ -21,6 +21,11 @@ const router = createRouter({
           name: "presentation",
           component: PresentationView,
         },
+        {
+          path: "/",
+          name: "landing",
+          component: LandingView,
+        },
       ]
     }
   ],
