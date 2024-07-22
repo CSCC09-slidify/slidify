@@ -1,16 +1,13 @@
 <template>
-  <VideoUpload :on-submit="submitVideo"/>
-  <ErrorMessage v-if="error.hasError" :message="error.message"/>
+  <VideoUpload :on-submit="submitVideo" />
+  <ErrorMessage v-if="error.hasError" :message="error.message" />
+  <GoogleSlides v-if="presentation.presentationId" :slide-ids="presentation.slideIds"
+    :presentation-title="presentation.presentationTitle" :presentation-id="presentation.presentationId"
+    :slide-scripts="presentation.slideScripts" class="w-100 fill-height" />
   <v-row class="align-center justify-center pa-4">
-    <v-col cols="12" md="8" lg="8" v-if="presentation.presentationId">
-      <GoogleSlides :slide-ids="presentation.slideIds" 
-                    :presentation-title="presentation.presentationTitle" 
-                    :presentation-id="presentation.presentationId"
-                    :slide-scripts="presentation.slideScripts"
-      />
-    </v-col>
-    <v-col  v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12" :lg="presentation.presentationId ? 4 : 12">
-      <LoadingSpinner :loading-message="loadingMessage"/>
+    <v-col v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12"
+      :lg="presentation.presentationId ? 4 : 12">
+      <LoadingSpinner :loading-message="loadingMessage" />
     </v-col>
   </v-row>
 </template>
@@ -42,7 +39,11 @@ export default {
       presentationId: "",
       presentationTitle: null,
       slideIds: [],
-      slideScripts: {}
+      slideScripts: {},
+      externalId: "",
+      status: "",
+      jobStarted: "",
+      jobFinished: ""
     }
   }),
   methods: {
@@ -73,17 +74,17 @@ export default {
               console.log(this.presentation.slideScripts)
             })
 
-            websocket.on(`slides/${job.id}/status`, (status) => {
-              this.loadingMessage = status;
-            })
+            // websocket.on(`slides/${job.id}/status`, (status) => {
+            //   this.loadingMessage = status;
+            // })
 
-            websocket.on(`slides/${job.id}/slideReady`, (slideId) => {
-              this.presentation.slideIds.push(slideId);
-            })
+            // websocket.on(`slides/${job.id}/slideReady`, (slideId) => {
+            //   this.presentation.slideIds.push(slideId);
+            // })
 
-            websocket.on(`slides/${job.id}/scriptReady`, ({slideId, script}) => {
-              this.presentation.slideScripts[slideId] = script;
-            })
+            // websocket.on(`slides/${job.id}/scriptReady`, ({slideId, script}) => {
+            //   this.presentation.slideScripts[slideId] = script;
+            // })
 
             websocket.on(`slides/${job.id}/presentationId`, (presentationId) => {
               this.presentation.presentationId = presentationId;

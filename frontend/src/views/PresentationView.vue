@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column mx-auto fill-height">
     <div class="pa-1" v-if="presentation.presentationId">
-      <h1>{{ presentation.title }}</h1>
+      <h1>{{ presentation.presentationTitle }}</h1>
       <div class="text-subtitle-1">Status: {{ presentation.status }}</div>
       <div class="text-subtitle-1">Job started: {{ presentation.jobStarted }}</div>
       <div class="text-subtitle-1">Job completed: {{ presentation.jobFinished }}</div>
@@ -38,7 +38,7 @@ export default {
     isLoading: false,
     presentation: {
       presentationId: "",
-      title: null,
+      presentationTitle: null,
       slideIds: [],
       slideScripts: {},
       externalId: "",
@@ -58,7 +58,7 @@ export default {
             this.presentation.externalId = res.externalId;
             this.presentation.slideIds = res.slideIds;
             this.presentation.slideScripts = res.slideScripts;
-            this.presentation.title = res.title;
+            this.presentation.presentationTitle = res.title;
             this.presentation.status = res.status;
             const dateOptions = {
               month: 'short',
