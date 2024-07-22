@@ -1,7 +1,7 @@
 "use strict";
 
 // TODO: remove hardcoded API endpoint
-const BASE_URL = process.env.VUE_APP_API_URL;
+const BASE_URL = process.env.VUE_APP_API_URL_2;
 
 const apiService = {};
 
