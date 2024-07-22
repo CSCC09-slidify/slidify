@@ -43,11 +43,11 @@ import SlidesHistory from "@/components/SlidesHistory.vue";
 import NotificationList from "@/components/NotificationList.vue";
 import UserSessionModal from "@/components/UserSessionModal.vue";
 import apiService from "@/services/api.service";
-import { googleSdkLoaded } from "vue3-google-login";
+//import { googleSdkLoaded } from "vue3-google-login";
 import { websocket } from "@/services/socket.service";
 import { useRoute } from "vue-router";
 import { watch } from "vue";
-
+import { googleLogin, googleLogout } from "@/tools/users.js";
 export default {
   name: "MainLayout",
   components: {
@@ -95,29 +95,15 @@ export default {
   },
   methods: {
     login() {
-      googleSdkLoaded(google => {
-        google.accounts.oauth2.initCodeClient({
-          client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-          scope: "email profile openid https://www.googleapis.com/auth/presentations",
-          redirect_uri: process.env.VUE_APP_GOOGLE_REDIRECT_URI,
-          include_granted_scopes: false,
-          callback: response => {
-            if (response.code) {
-              apiService.signIn(response.code).then((response) => {
-                console.log(response);
-                this.$router.go(0);
-              })
-            }
-          }
-        }).requestCode();
-      });
+      googleLogin(() => {
+        this.$router.go(0);
+      })
     },
     logout() {
-      apiService.signOut().then((response) => {
-        console.log(response);
+      googleLogout(() => {
         this.updateAuthStatus();
         this.$router.push("/");
-      });
+      })
     },
     updateAuthStatus(next = () => {}) {
       apiService.whoami().then((response) => {
