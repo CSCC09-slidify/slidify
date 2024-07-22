@@ -40,6 +40,33 @@ apiService.getSlide = function (slideId) {
   }).then((response) => response.json());
 };
 
+apiService.getSlideJobs = function () {
+  return fetch(BASE_URL + `/api/slides/jobs/active`, {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => response.json());
+};
+
+apiService.watchJob = function (jobId) {
+  return fetch(BASE_URL + `/api/slides/jobs/watch/${jobId}`, {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => response.json());
+};
+
+apiService.clearNotifications = function () {
+  return fetch(BASE_URL + `/api/notifications/readAll`, {
+    method: "POST",
+    credentials: "include",
+  }).then((response) => response.json());
+}
+
+apiService.fetchNotifications = function () {
+  return fetch(BASE_URL + `/api/notifications/active`, {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => response.json());
+}
 
 apiService.whoami = function () {
   return fetch(BASE_URL + "/api/users/whoami", {

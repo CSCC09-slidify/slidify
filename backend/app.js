@@ -3,6 +3,7 @@ import session from "express-session";
 import sequelizeStore from "connect-session-sequelize";
 import { sequelize } from "./datasource.js";
 import { slidesRouter } from "./routers/slidesRouter.js";
+import { notificationsRouter } from "./routers/notificationsRouter.js";
 import { usersRouter } from "./routers/usersRouter.js";
 import { registerIOListeners } from "./sockets.js";
 import { Server } from "socket.io";
@@ -65,6 +66,7 @@ app.use((req, res, next) => {
 
 app.use("/api/slides", slidesRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/notifications", notificationsRouter);
 
 httpServer.listen(PORT, (err) => {
   if (err) console.log(err);

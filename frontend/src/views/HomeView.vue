@@ -21,7 +21,7 @@ import GoogleSlides from "../components/GoogleSlides.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
 import ErrorMessage from "../components/ErrorMessage.vue";
 import apiService from "@/services/api.service";
-import { io } from "socket.io-client";
+import { websocket } from "@/services/socket.service";
 
 export default {
   name: "HomeView",
@@ -62,8 +62,7 @@ export default {
           this.presentation.presentationTitle = title;
           if (job.id) {
             // TODO: Move URL to .env
-            this.websocket = new io("http://localhost:3000")
-            this.websocket.on(`slides/${job.id}/done`, (res) => {
+            websocket.on(`slides/${job.id}/done`, (res) => {
               this.isLoading = false;
               if (res.error) {
                 this.error = {
@@ -74,19 +73,19 @@ export default {
               console.log(this.presentation.slideScripts)
             })
 
-            this.websocket.on(`slides/${job.id}/status`, (status) => {
+            websocket.on(`slides/${job.id}/status`, (status) => {
               this.loadingMessage = status;
             })
 
-            this.websocket.on(`slides/${job.id}/slideReady`, (slideId) => {
+            websocket.on(`slides/${job.id}/slideReady`, (slideId) => {
               this.presentation.slideIds.push(slideId);
             })
 
-            this.websocket.on(`slides/${job.id}/scriptReady`, ({slideId, script}) => {
+            websocket.on(`slides/${job.id}/scriptReady`, ({slideId, script}) => {
               this.presentation.slideScripts[slideId] = script;
             })
 
-            this.websocket.on(`slides/${job.id}/presentationId`, (presentationId) => {
+            websocket.on(`slides/${job.id}/presentationId`, (presentationId) => {
               this.presentation.presentationId = presentationId;
             })
           } else {
