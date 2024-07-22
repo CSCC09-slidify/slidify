@@ -1,5 +1,7 @@
 <template>
   <v-app>
+    <UserSessionModal v-if="loginRequired == 'session'" :onSignIn="reload" header="Session Expired" headerIcon="mdi-clock-outline" body="To continue, click the button below to sign in, or return to the homepage." />
+    <UserSessionModal v-if="loginRequired == 'signout'" :onSignIn="reload" header="Sign In" headerIcon="mdi-account"  body="You must be signed in to view this page." />
     <v-navigation-drawer v-model="drawer"
       class="py-2"
       :permanent="!$vuetify.display.mobile"
@@ -39,17 +41,19 @@
 <script>
 import SlidesHistory from "@/components/SlidesHistory.vue";
 import NotificationList from "@/components/NotificationList.vue";
+import UserSessionModal from "@/components/UserSessionModal.vue";
 import apiService from "@/services/api.service";
-import { googleSdkLoaded } from "vue3-google-login";
+//import { googleSdkLoaded } from "vue3-google-login";
 import { websocket } from "@/services/socket.service";
 import { useRoute } from "vue-router";
 import { watch } from "vue";
-
+import { googleLogin, googleLogout } from "@/tools/users.js";
 export default {
   name: "MainLayout",
   components: {
     SlidesHistory,
-    NotificationList
+    NotificationList,
+    UserSessionModal
   },
   data: () => ({
     isAuthenticated: false,
@@ -60,7 +64,8 @@ export default {
       isOpen: false,
       content: []
     },
-    waitingForPresentation: false
+    waitingForPresentation: false,
+    loginRequired: "none"
   }),
   watch: {
     isAuthenticated: {
@@ -90,33 +95,20 @@ export default {
   },
   methods: {
     login() {
-      googleSdkLoaded(google => {
-        google.accounts.oauth2.initCodeClient({
-          client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-          scope: "email profile openid https://www.googleapis.com/auth/presentations",
-          redirect_uri: process.env.VUE_APP_GOOGLE_REDIRECT_URI,
-          include_granted_scopes: false,
-          callback: response => {
-            if (response.code) {
-              apiService.signIn(response.code).then((response) => {
-                console.log(response);
-                this.updateAuthStatus();
-              })
-            }
-          }
-        }).requestCode();
-      });
+      googleLogin(() => {
+        this.$router.go(0);
+      })
     },
     logout() {
-      apiService.signOut().then((response) => {
-        console.log(response);
+      googleLogout(() => {
         this.updateAuthStatus();
-      });
+        this.$router.push("/");
+      })
     },
-    updateAuthStatus() {
+    updateAuthStatus(next = () => {}) {
       apiService.whoami().then((response) => {
         this.isAuthenticated = Boolean(response.userId);
-        console.log(response)
+        next();
       });
     },
     fetchSlidesHistory() {
@@ -156,7 +148,7 @@ export default {
                         this.notification.content.splice(0, 0, {
                             text: r.content.title,
                             date: r.date,
-                            link: r.type == "presentation" ? `presentations/${r.content.presentationId}` : ""
+                            link: r.type == "presentation" ? `/presentations/${r.content.presentationId}` : ""
                         })
                         this.notification.active = true;
                         if (r.type == "presentation") {
@@ -176,14 +168,36 @@ export default {
                     this.notification.content = []
                 })
         }
-    }
+    },
+    displayLogin(route) {
+      const previousValue = this.isAuthenticated;
+      this.updateAuthStatus(
+        () => {
+          if (route && route.path == "/") {
+            this.loginRequired = "none";
+          } else if (previousValue && !this.isAuthenticated) {
+            this.loginRequired = "session"
+          } else if (!previousValue && !this.isAuthenticated) {
+            this.loginRequired = "signout"
+          } else {
+            this.loginRequired = "none"
+          }
+        }
+      )
+    },
+    reload() {
+      this.$router.go(0);
+    },
   },
+
   created() {
-    this.updateAuthStatus();
+    this.updateAuthStatus(this.displayLogin);
+    this.fetchSlidesHistory();
     const route = useRoute();
     watch(route, (to) => {
         console.log("Change route")
         console.log(to)
+        this.displayLogin(to)
     })
   },
 };
