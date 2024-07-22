@@ -1,15 +1,21 @@
 <template>
-  <div class="d-flex mx-auto fill-height">
-    <v-col v-if="presentation.presentationId" class="w-100 fill-height">
-      <GoogleSlides :slide-ids="presentation.slideIds" 
+  <div class="d-flex flex-column mx-auto fill-height">
+    <div class="pa-1">
+      <h1>{{ presentation.title }}</h1>
+      <div class="text-subtitle-1">Status: in progress</div>
+      <div class="text-subtitle-1">Job started: July 21 2024 @ 6:20pm</div>
+      <div class="text-subtitle-1">Job completed: July 21 2024 @ 7:20pm</div>
+    </div>
+      <GoogleSlides v-if="presentation.presentationId"
+                    :slide-ids="presentation.slideIds" 
                     :presentation-title="presentation.presentationTitle" 
                     :presentation-id="presentation.externalId"
                     :slide-scripts="presentation.slideScripts"
+                    class="w-100 fill-height"
       />
-    </v-col>
-    <v-col v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12" :lg="presentation.presentationId ? 4 : 12">
+    <div v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12" :lg="presentation.presentationId ? 4 : 12">
       <LoadingSpinner loading-message="Fetching presentation"/>
-    </v-col>
+    </div>
   </div>
 </template>
 
@@ -52,7 +58,7 @@ export default {
                     this.presentation.externalId = res.externalId;
                     this.presentation.slideIds = res.slideIds;
                     this.presentation.slideScripts = res.slideScripts;
-                    this.presentation.presentationTitle = res.title;
+                    this.presentation.title = res.title;
                 }
                 this.isLoading = false;
             })
