@@ -45,7 +45,7 @@ const sessionStore = new sequelizeSessionStore({
 });
 app.use(
   session({
-    secret: process.env.SLIDIFY_SESSION_SECRET,
+    secret: process.env.SLIDIFY_SESSION_SECRET ?? "slidifysecret",
     proxy: true,
     resave: false,
     saveUninitialized: false,
