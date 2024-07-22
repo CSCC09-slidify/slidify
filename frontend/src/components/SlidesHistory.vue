@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="slidesHistory">
     <v-list-item class="pa-4" title="History"></v-list-item>
     <v-virtual-scroll :items="slidesHistory">
       <template v-slot:default="{ item }">
@@ -32,7 +32,7 @@ export default {
 </script>
 
 <style scoped>
-a {
+.slidesHistory a {
   text-decoration: none;
   color: black;
 }
