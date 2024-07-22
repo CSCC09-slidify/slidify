@@ -30,7 +30,6 @@ usersRouter.post("/signin", async (req, res) => {
       idToken: tokens.id_token,
     });
     const payload = ticket.getPayload();
-
     // use this as unique identifier for the user
     const userId = payload["sub"];
     let user = await User.findOne({ where: { userId } });
@@ -46,7 +45,9 @@ usersRouter.post("/signin", async (req, res) => {
     // TODO: encrypt
     req.session.accessToken = tokens.access_token;
     req.session.refreshToken = tokens.refresh_token;
-
+    const expiryDate = new Date(payload["exp"] * 1000);
+    console.log("Google sessions expires at: " + expiryDate.toLocaleString())
+    req.session.expiry = payload["exp"] * 1000;
     return res.json({
       userId: user.userId,
       name: user.name,
@@ -81,6 +82,10 @@ usersRouter.get("/whoami", async (req, res) => {
   if (!user) {
     return res.status(401).json({
       error: "User not authenticated",
+    });
+  } else if (req.session.expiry < Date.now()) {
+    return res.status(401).json({
+      error: "User session has expired",
     });
   }
   return res.json({
