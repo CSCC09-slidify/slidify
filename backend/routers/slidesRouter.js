@@ -20,9 +20,9 @@ slidesRouter.post("/fromVideo", validateUserCredentials, validateNoActiveJobs, u
     const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
     const job = await Job.create({
         jid: jobId,
-        title,
-        userId,
-        status: "running"
+        status: "running",
+        startedAt: new Date(),
+        UserUserId: userId,
     });
     convertVideoToSlides(
         {
@@ -47,10 +47,10 @@ slidesRouter.post("/fromVideo", validateUserCredentials, validateNoActiveJobs, u
             if (!r.error) {
                 const { presentationId } = r;
                 await Presentation.create({
-                    userId: req.session.userId,
                     presentationId: jobId,
                     externalId: presentationId,
-                    title
+                    title,
+                    UserUserId: req.session.userId,
                 })
                 job.status = "done";
                 const notification = await Notification.create({
@@ -67,6 +67,7 @@ slidesRouter.post("/fromVideo", validateUserCredentials, validateNoActiveJobs, u
             } else {
                 job.status = "error";
             }
+            job.finishedAt = new Date();
             await job.save()
             req.io.emit(`slides/${jobId}/done`, r);
         }
@@ -79,7 +80,7 @@ slidesRouter.get("/", validateUserCredentials, async (req, res) => {
         const userId = req.session.userId;
         const presentations = await Presentation.findAll({
             where: {
-                userId
+                UserUserId: userId
             }
         });
         const fetchSlides = presentations.map(p => 
@@ -107,7 +108,7 @@ slidesRouter.get("/:presentationId", validateUserCredentials, async (req, res) =
     const userId = req.session.userId;
     const presentation = await Presentation.findOne({
         where: {
-            userId,
+            UserUserId: userId,
             presentationId: req.params.presentationId
         }
     });
@@ -138,7 +139,7 @@ slidesRouter.get("/jobs/active", validateUserCredentials, async (req, res) => {
     const userId = req.session.userId;
     const activeJobs = await Job.findAll({
         where: {
-            userId: userId,
+            UserUserId: userId,
             status: "running"
         }
     })

@@ -19,7 +19,7 @@ export const validateNoActiveJobs = async (req, res, next) => {
   validateUserCredentials(req, res, async () => {
     const jobs = await Job.count({
       where: {
-        userId: req.session.userId,
+        UserUserId: req.session.userId,
         status: "running"
       }
     });
