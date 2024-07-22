@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-navigation-drawer v-model="drawer"
+    <v-navigation-drawer v-if="isAuthenticated" v-model="drawer"
       class="py-2"
       :permanent="!$vuetify.display.mobile"
       :location="$vuetify.display.mobile ? 'bottom' : undefined"
@@ -15,7 +15,7 @@
         </div>
       </template>
     </v-navigation-drawer>
-    <v-app-bar class="px-1" color="white" prominent>
+    <v-app-bar v-if="isAuthenticated" class="px-1" color="white" prominent>
       <v-app-bar-nav-icon v-if="isAuthenticated" @click.stop="drawer = !drawer">
         <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
       </v-app-bar-nav-icon>
@@ -26,7 +26,7 @@
       <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
       <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
-    <v-main class="ma-5">
+    <v-main :class="isAuthenticated ? 'ma-5' : ''">
       <router-view></router-view>
     </v-main>
   </v-app>
