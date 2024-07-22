@@ -7,9 +7,9 @@ export const validateUserCredentials = async (req, res, next) => {
         return res.status(401).json({message: "Invalid credentials"});
     }
     const user = await User.findByPk(req.session.userId);
-    if (!user) {
+    if (!user || req.session.expiry < Date.now()) {
       return res.status(401).json({
-        error: "User not authenticated: " + req.session.userId,
+        error: "User not authenticated. Reload the page and try again."
       });
     }
     next();

@@ -91,7 +91,7 @@ export default {
           } else {
             this.error = {
               hasError: true,
-              message: ""
+              message: job ? job.error : ""
             }
           }
         })
