@@ -50,7 +50,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
-    cookie: { secure: false },
+    name: "SlidifyCookie",
+    cookie: { secure: false, sameSite: 'none' },
   })
 );
 sessionStore.sync();
