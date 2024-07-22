@@ -1,9 +1,6 @@
 import { Router } from "express";
 import { User } from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
-import dotenv from "dotenv";
-
-dotenv.config();
 
 export const usersRouter = Router();
 
