@@ -1,6 +1,7 @@
 import { sequelize } from "../datasource.js";
 import { DataTypes } from "sequelize";
 import { User } from "./user.js";
+import { Job } from "./job.js";
 
 export const Presentation = sequelize.define("PresentationData", {
   presentationId: {
@@ -20,3 +21,6 @@ export const Presentation = sequelize.define("PresentationData", {
 
 Presentation.belongsTo(User);
 User.hasMany(Presentation);
+
+Presentation.belongsTo(Job);
+Job.hasOne(Presentation);

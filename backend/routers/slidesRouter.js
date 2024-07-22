@@ -51,6 +51,7 @@ slidesRouter.post("/fromVideo", validateUserCredentials, validateNoActiveJobs, u
                     externalId: presentationId,
                     title,
                     UserUserId: req.session.userId,
+                    SlidifyPresentationJobJid: jobId
                 })
                 job.status = "done";
                 const notification = await Notification.create({
@@ -110,7 +111,12 @@ slidesRouter.get("/:presentationId", validateUserCredentials, async (req, res) =
         where: {
             UserUserId: userId,
             presentationId: req.params.presentationId
-        }
+        },
+        include: [
+            {
+                model: Job,
+            }
+        ]
     });
     if (!presentation) {
         return res.status(404).json({ error: "Presentation not found" })
@@ -129,7 +135,10 @@ slidesRouter.get("/:presentationId", validateUserCredentials, async (req, res) =
                 externalId: presentation.externalId, 
                 slideIds, 
                 slideScripts,
-                createdAt: presentation.createdAt
+                createdAt: presentation.createdAt,
+                status: presentation.SlidifyPresentationJob.status,
+                jobStarted: presentation.SlidifyPresentationJob.startedAt,
+                jobFinished: presentation.SlidifyPresentationJob.finishedAt
             })
         })
 
