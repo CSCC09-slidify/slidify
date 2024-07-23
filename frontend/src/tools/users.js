@@ -1,5 +1,6 @@
 import { googleSdkLoaded } from "vue3-google-login";
 import apiService from "@/services/api.service";
+
 export function googleLogin(next) {
   apiService.whoami()
     .then(res => {

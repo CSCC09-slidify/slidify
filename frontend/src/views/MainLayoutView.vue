@@ -43,11 +43,11 @@ import SlidesHistory from "@/components/SlidesHistory.vue";
 import NotificationList from "@/components/NotificationList.vue";
 import UserSessionModal from "@/components/UserSessionModal.vue";
 import apiService from "@/services/api.service";
-//import { googleSdkLoaded } from "vue3-google-login";
 import { websocket } from "@/services/socket.service";
 import { useRoute } from "vue-router";
 import { watch } from "vue";
 import { googleLogin, googleLogout } from "@/tools/users.js";
+
 export default {
   name: "MainLayout",
   components: {
