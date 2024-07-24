@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { User } from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
+import { validateUserCredentials } from "../middleware/auth.js";
+import oauthApi from "../tools/oauth/api.js";
 
 export const usersRouter = Router();
 
@@ -91,15 +93,19 @@ usersRouter.get("/whoami", async (req, res) => {
   });
 });
 
-// usersRouter.get("/slides", async (req, res) => {
-//   let authorizationUrl = client.generateAuthUrl({
-//     access_type: "offline",
-//     scope: "https://www.googleapis.com/auth/presentations",
-//     include_granted_scopes: true,
-//   });
-//   authorizationUrl = authorizationUrl.replace(
-//     "postmessage",
-//     process.env.GOOGLE_REDIRECT_URI
-//   );
-//   res.redirect(authorizationUrl);
-// });
+usersRouter.delete("/", validateUserCredentials, async (req, res) => {
+  const userId = req.session.userId;
+  await User.destroy({
+    where: {
+      userId: userId
+    }
+  })
+  return res.status(204);
+});
+
+usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
+  oauthApi.getUserProfile({ authToken: req.session.accessToken })
+    .then(profile => {
+      res.json({profile});
+    })
+})

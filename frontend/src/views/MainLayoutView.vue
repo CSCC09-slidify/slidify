@@ -2,7 +2,7 @@
   <v-app>
     <UserSessionModal v-if="loginRequired == 'session'" :onSignIn="reload" header="Session Expired" headerIcon="mdi-clock-outline" body="To continue, click the button below to sign in, or return to the homepage." />
     <UserSessionModal v-if="loginRequired == 'signout'" :onSignIn="reload" header="Sign In" headerIcon="mdi-account"  body="You must be signed in to view this page." />
-    <v-navigation-drawer v-if="isAuthenticated" v-model="drawer"
+    <v-navigation-drawer v-if="isAuthenticated && showMainLayout" v-model="drawer"
       class="py-2"
       :permanent="!$vuetify.display.mobile"
       :location="$vuetify.display.mobile ? 'bottom' : undefined"
@@ -17,7 +17,7 @@
         </div>
       </template>
     </v-navigation-drawer>
-    <v-app-bar class="px-1" color="white" prominent v-if="isAuthenticated">
+    <v-app-bar class="px-1" color="white" prominent v-if="isAuthenticated && showMainLayout">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer">
         <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
       </v-app-bar-nav-icon>
@@ -25,12 +25,10 @@
         <router-link to="/" class="text-decoration-none">Slidify</router-link>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon="mdi-account-circle"></v-btn>
+      <AccountSettingsButton /> 
       <v-btn @click="toggleNotifications" id="notification-activator" :icon="notification.active ? 'mdi-bell-badge' : 'mdi-bell'"></v-btn>
       <NotificationList activator="#notification-activator" :content="notification.content" :isOpened="notification.isOpen" :clearNotifications="clearNotifications" :onClose="closeNotifications" />
       <v-btn icon="mdi-dots-vertical"></v-btn>
-      <v-btn v-if="isAuthenticated" @click="logout">Sign out</v-btn>
-      <v-btn v-else @click="login">Sign in with Google</v-btn>
     </v-app-bar>
     <v-main class="p-5">
       <router-view></router-view>
@@ -42,6 +40,7 @@
 import SlidesHistory from "@/components/SlidesHistory.vue";
 import NotificationList from "@/components/NotificationList.vue";
 import UserSessionModal from "@/components/UserSessionModal.vue";
+import AccountSettingsButton from "@/components/AccountSettingsButton.vue";
 import apiService from "@/services/api.service";
 import { websocket } from "@/services/socket.service";
 import { useRoute } from "vue-router";
@@ -53,7 +52,8 @@ export default {
   components: {
     SlidesHistory,
     NotificationList,
-    UserSessionModal
+    UserSessionModal,
+    AccountSettingsButton
   },
   data: () => ({
     isAuthenticated: false,
@@ -66,7 +66,8 @@ export default {
     },
     waitingForPresentation: false,
     loginRequired: "none",
-    showMainLayout: false
+    showMainLayout: false,
+    accountSettings: false,
   }),
   watch: {
     isAuthenticated: {
@@ -76,7 +77,7 @@ export default {
         if (this.isAuthenticated) {
             this.fetchNotifications();
             this.watchNotifications();
-            this.showMainLayout = this.$route.name == "landing"
+            this.showMainLayout = this.$route.name != "landing"
         } else {
             this.slidesHistory = []
             this.notification = {
@@ -99,7 +100,7 @@ export default {
   methods: {
     login() {
       googleLogin(() => {
-        this.$router.go(0);
+        this.reload()
       })
     },
     logout() {
@@ -200,7 +201,8 @@ export default {
     watch(route, (to) => {
         console.log("Change route")
         console.log(to)
-        this.displayLogin(to)
+        this.showMainLayout = to.name != "landing"
+        this.updateAuthStatus(() => this.displayLogin(to))
     })
   },
 };

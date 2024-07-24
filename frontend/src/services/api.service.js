@@ -82,4 +82,11 @@ apiService.signOut = function () {
   }).then((response) => response.json());
 }
 
+apiService.getUserProfile = function () {
+  return fetch(BASE_URL + "/api/users/profile", {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => response.json());
+}
+
 export default apiService;
