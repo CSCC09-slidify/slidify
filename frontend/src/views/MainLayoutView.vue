@@ -90,6 +90,7 @@ export default {
   },
   methods: {
     login() {
+      console.log(process.env)
       googleSdkLoaded(google => {
         google.accounts.oauth2.initCodeClient({
           client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
