@@ -152,5 +152,5 @@ slidesRouter.get("/jobs/deleteAllRunning", async (req, res) => {
             status: "running"
         }
     })
-    return res.status(204).json({ message: "Deleted" })
+    return res.status(200)
 })
