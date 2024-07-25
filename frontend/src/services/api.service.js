@@ -1,7 +1,7 @@
 "use strict";
 
 // TODO: remove hardcoded API endpoint
-const BASE_URL = process.env.VUE_APP_GOOGLE_API_URL ?? "https://backend-app-f3w7geeriq-uc.a.run.app";
+const BASE_URL = process.env.VUE_APP_API_URL;
 
 const apiService = {};
 
