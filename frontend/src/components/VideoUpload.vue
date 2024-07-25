@@ -30,7 +30,6 @@ export default {
   data: () => ({
     title: null,
     videoFile: null,
-    websocket: null
   }),
   components: {
     TextInput

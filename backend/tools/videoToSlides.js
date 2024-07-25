@@ -4,9 +4,11 @@ import { convertTitleToSlides,
     convertSummaryToSlide, convertSummaryToSpeakerNotes, 
     addImagesReferenceList, addImagesToSlides } from "./slides/logic.js";
 import { convertSpeechmaticsSummary } from "./video/logic.js";
+import { convertOpenAiSummary } from "./text/logic.js";
 import videoApi from "./video/api.js";
 import oauthApi from "./oauth/api.js";
 import imagesApi from "./images/api.js";
+import OpenAI from "openai";
 
 // returns { presentationId, numSlides }
 export const convertVideoToSlides = async (
@@ -31,7 +33,7 @@ export const convertVideoToSlides = async (
                     clearInterval(timeout);
                     videoApi.getVideoSummary(id, videoToken)
                     .then(results => {
-                        parseSummary(results, slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, scriptReady, next);
+                        parseSummary(convertSpeechmaticsSummary(results), slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, scriptReady, next);
                     })
                 } else {
                     console.log("Job rejected")
@@ -61,8 +63,34 @@ export const convertVideoToSlides = async (
 
 }
 
-export const parseSummary = async (data, slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, scriptReady, next) => {
-    const summary = convertSpeechmaticsSummary(data);
+export const convertTextToSlides = async ({text, title, slidesOAuthToken}, updateStatus, presentationIdReady, slideReady, scriptReady, next) => {
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+    });
+    const inputText = text.split(" ").length > 1000 ? text.split(" ").slice(0, 1000).join(" ") : text;
+    const prompt = "Please summarize the following text into named chapters and bullet points: " + inputText;
+
+    const stream = await openai.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "gpt-4o-mini",
+        stream: true
+    });
+
+    const results = []
+    for await (const chunk of stream) {
+        updateStatus("Processing Text: " + chunk.choices[0]?.delta?.content)
+        results.push(chunk.choices[0]?.delta?.content)
+    }
+    console.log(results.join(""))
+    const summary = results.join("");
+    const parsed = convertOpenAiSummary(summary)
+    if (parsed.length == 0) {
+        return next({error: "Error creating slides - Make sure the provided text can be summarized logically"});
+    }
+    parseSummary(parsed, slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, scriptReady, next)
+}
+
+export const parseSummary = async (summary, slidesOAuthToken, title, updateStatus, presentationIdReady, slideReady, scriptReady, next) => {
     const {presentationId} = await slidesApi.createPresentation({
         authToken: slidesOAuthToken,
         title: title

@@ -177,7 +177,7 @@ export default {
       const previousValue = this.isAuthenticated;
       this.updateAuthStatus(
         () => {
-          if (route && route.path == "/") {
+          if ((route && route.path == "/")) {
             this.loginRequired = "none";
           } else if (previousValue && !this.isAuthenticated) {
             this.loginRequired = "session"

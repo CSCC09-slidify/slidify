@@ -176,6 +176,8 @@ export const addImagesReferenceList = (slideBuilder, images, slideId) => {
         id: "imageReferences",
         style: {
             italic: true,
+            fontSize: 12,
+            fontFamily: BULLET_FONT_FAMILY
         },
         textRange: {
             startIndex: item.start,
