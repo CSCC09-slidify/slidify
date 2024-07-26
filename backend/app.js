@@ -37,6 +37,7 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+app.set("trust proxy");
 
 const sequelizeSessionStore = sequelizeStore(session.Store);
 const sessionStore = new sequelizeSessionStore({
@@ -51,7 +52,7 @@ app.use(
     saveUninitialized: false,
     store: sessionStore,
     name: "SlidifyCookie",
-    cookie: { secure: true, sameSite: 'none' },
+    cookie: { secure: true, sameSite: 'none', httpOnly: true,  maxAge: 1000 * 60 * 60 * 48}
   })
 );
 sessionStore.sync();
