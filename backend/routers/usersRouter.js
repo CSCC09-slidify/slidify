@@ -43,7 +43,7 @@ usersRouter.post("/signin", async (req, res) => {
     // TODO: encrypt
     req.session.accessToken = tokens.access_token;
     req.session.refreshToken = tokens.refresh_token;
-
+    console.log("New session: ", req.session.userId)
     return res.json({
       userId: user.userId,
       name: user.name,
@@ -77,7 +77,7 @@ usersRouter.get("/whoami", async (req, res) => {
   const user = await User.findByPk(req.session.userId);
   if (!user) {
     return res.status(401).json({
-      error: "User not authenticated",
+      error: "User not authenticated: invalid session",
     });
   }
   return res.json({
