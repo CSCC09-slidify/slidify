@@ -8,6 +8,7 @@ const apiService = {};
 apiService.signIn = function (code) {
   return fetch(BASE_URL + "/api/users/signin", {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -30,6 +31,7 @@ apiService.createSlides = function (title, file) {
 apiService.getSlides = function () {
   return fetch(BASE_URL + `/api/slides`, {
     method: "GET",
+    credentials: "include",
   }).then((response) => response.json());
 };
 
