@@ -49,7 +49,7 @@ app.use(
     secret: process.env.SLIDIFY_SESSION_SECRET ?? "slidifysecret",
     proxy: true,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     store: sessionStore,
     name: "SlidifyCookie",
     cookie: { secure: true, sameSite: false, httpOnly: true,  maxAge: 1000 * 60 * 60 * 48, domain: process.env.CORS_ORIGIN }
