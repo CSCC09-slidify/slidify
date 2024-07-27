@@ -44,6 +44,7 @@ usersRouter.post("/signin", async (req, res) => {
     req.session.accessToken = tokens.access_token;
     req.session.refreshToken = tokens.refresh_token;
     console.log("New session: ", req.session.userId)
+    req.session.save();
     return res.json({
       userId: user.userId,
       name: user.name,
