@@ -10,6 +10,9 @@ import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import cors from "cors";
 import http from "http";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const app = express();
 const httpServer = http.createServer(app);
@@ -30,7 +33,7 @@ try {
 }
 
 const corsOptions = {
-  origin: ["http://localhost"],
+  origin: [process.env.CORS_ORIGIN],
   credentials: true,
 };
 app.use(cors(corsOptions));

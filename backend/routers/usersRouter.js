@@ -1,9 +1,8 @@
 import { Router } from "express";
 import { User } from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { validateUserCredentials } from "../middleware/auth.js";
+import oauthApi from "../tools/oauth/api.js";
 
 export const usersRouter = Router();
 
@@ -30,7 +29,6 @@ usersRouter.post("/signin", async (req, res) => {
       idToken: tokens.id_token,
     });
     const payload = ticket.getPayload();
-
     // use this as unique identifier for the user
     const userId = payload["sub"];
     let user = await User.findOne({ where: { userId } });
@@ -46,7 +44,9 @@ usersRouter.post("/signin", async (req, res) => {
     // TODO: encrypt
     req.session.accessToken = tokens.access_token;
     req.session.refreshToken = tokens.refresh_token;
-
+    const expiryDate = new Date(payload["exp"] * 1000);
+    console.log("Google sessions expires at: " + expiryDate.toLocaleString())
+    req.session.expiry = payload["exp"] * 1000;
     return res.json({
       userId: user.userId,
       name: user.name,
@@ -82,6 +82,10 @@ usersRouter.get("/whoami", async (req, res) => {
     return res.status(401).json({
       error: "User not authenticated",
     });
+  } else if (req.session.expiry < Date.now()) {
+    return res.status(401).json({
+      error: "User session has expired",
+    });
   }
   return res.json({
     userId: user.userId,
@@ -89,15 +93,19 @@ usersRouter.get("/whoami", async (req, res) => {
   });
 });
 
-// usersRouter.get("/slides", async (req, res) => {
-//   let authorizationUrl = client.generateAuthUrl({
-//     access_type: "offline",
-//     scope: "https://www.googleapis.com/auth/presentations",
-//     include_granted_scopes: true,
-//   });
-//   authorizationUrl = authorizationUrl.replace(
-//     "postmessage",
-//     process.env.GOOGLE_REDIRECT_URI
-//   );
-//   res.redirect(authorizationUrl);
-// });
+usersRouter.delete("/", validateUserCredentials, async (req, res) => {
+  const userId = req.session.userId;
+  await User.destroy({
+    where: {
+      userId: userId
+    }
+  })
+  return res.status(204);
+});
+
+usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
+  oauthApi.getUserProfile({ authToken: req.session.accessToken })
+    .then(profile => {
+      res.json({profile});
+    })
+})

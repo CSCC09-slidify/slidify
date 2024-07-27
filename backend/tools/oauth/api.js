@@ -7,4 +7,11 @@ module.validateToken = async ({authToken}) => {
             .then(({expires_in}) => expires_in > 60);
 }
 
+
+// checks token info
+module.getUserProfile = async ({authToken}) => {
+    return fetch(`https://openidconnect.googleapis.com/v1/userinfo?access_token=${authToken}`)
+            .then(res => res.json())
+}
+
 export default module;

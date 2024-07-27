@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column mx-auto fill-height">
+  <div class="d-flex flex-column mx-4 fill-height">
     <div class="pa-1" v-if="presentation.presentationId">
       <h1>{{ presentation.presentationTitle }}</h1>
       <div class="text-subtitle-1">Status: {{ presentation.status }}</div>
