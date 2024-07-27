@@ -37,7 +37,7 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
-app.set("trust proxy");
+app.set("trust proxy", 1);
 
 const sequelizeSessionStore = sequelizeStore(session.Store);
 const sessionStore = new sequelizeSessionStore({
