@@ -51,7 +51,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
-    cookie: { secure: true, sameSite: 'none',  same_site: 'none', httpOnly: true,  maxAge: 1000 * 60 * 60 * 48, domain: process.env.CORS_ORIGIN }
+    cookie: { secure: true, sameSite: 'none',  same_site: 'none', httpOnly: false,  maxAge: 1000 * 60 * 60 * 48, domain: process.env.CORS_ORIGIN }
   })
 );
 sessionStore.sync();
