@@ -21,6 +21,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Create .env.local file
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          envkey_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          envkey_GOOGLE_REDIRECT_URI: ${{ secrets.B_GOOGLE_REDIRECT_URI }}
+          envkey_SPEECHMATICS_API_KEY: ${{ secrets.B_SPEECHMATICS_API_KEY }}
+          envkey_CUSTOM_SEARCH_API_KEY: ${{ secrets.B_CUSTOM_SEARCH_API_KEY }}
+          envkey_CUSTOM_SEARCH_ENGINE_ID: ${{ secrets.B_CUSTOM_SEARCH_ENGINE_ID }}
+          envkey_DATABASE_URL: ${{ secrets.B_DATABASE_URL }}
+          envkey_SLIDIFY_SESSION_SECRET: ${{ secrets.B_SLIDIFY_SESSION_SECRET }}
+          envkey_CORS_ORIGIN: ${{ secrets.B_CORS_ORIGIN }}
+          directory: /backend
+          file_name: .env
+          fail_on_empty: true
+          sort_keys: false
+
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
