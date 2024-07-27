@@ -1,25 +1,22 @@
-<template>  
+<template>
   <v-container>
     <p>Convert from:</p>
     <v-radio-group inline v-model="inputType" hide-details="auto">
       <v-radio label="Video" value="video"></v-radio>
       <v-radio label="Text" value="text"></v-radio>
     </v-radio-group>
-    <VideoUpload v-if="inputType == 'video'" :on-submit="submitVideo"/>
-    <TextUpload v-if="inputType == 'text'" :on-submit="submitText"/>
-    <ErrorMessage v-if="error.hasError" :message="error.message"/>
-    <v-row class="align-center justify-center pa-4">
-      <v-col cols="12" md="8" lg="8" v-if="presentation.presentationId">
-        <GoogleSlides :slide-ids="presentation.slideIds" 
-                      :presentation-title="presentation.presentationTitle" 
-                      :presentation-id="presentation.presentationId"
-                      :slide-scripts="presentation.slideScripts"
-        />
-      </v-col>
-      <v-col  v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12" :lg="presentation.presentationId ? 4 : 12">
-        <LoadingSpinner :loading-message="loadingMessage"/>
-      </v-col>
-    </v-row>
+    <VideoUpload v-if="inputType == 'video'" :on-submit="submitVideo" />
+    <TextUpload v-if="inputType == 'text'" :on-submit="submitText" />
+    <ErrorMessage v-if="error.hasError" :message="error.message" />
+  <GoogleSlides v-if="presentation.presentationId" :slide-ids="presentation.slideIds"
+    :presentation-title="presentation.presentationTitle" :presentation-id="presentation.presentationId"
+    :slide-scripts="presentation.slideScripts" class="w-100 fill-height" />
+  <v-row class="align-center justify-center pa-4">
+    <v-col v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12"
+      :lg="presentation.presentationId ? 4 : 12">
+      <LoadingSpinner :loading-message="loadingMessage" />
+    </v-col>
+  </v-row>
   </v-container>
 </template>
 
@@ -52,7 +49,11 @@ export default {
       presentationId: "",
       presentationTitle: null,
       slideIds: [],
-      slideScripts: {}
+      slideScripts: {},
+      externalId: "",
+      status: "",
+      jobStarted: "",
+      jobFinished: ""
     },
     inputType: "video"
   }),
@@ -79,7 +80,7 @@ export default {
           this.presentation.slideIds.push(slideId);
         })
 
-        websocket.on(`slides/${job.id}/scriptReady`, ({slideId, script}) => {
+        websocket.on(`slides/${job.id}/scriptReady`, ({ slideId, script }) => {
           this.presentation.slideScripts[slideId] = script;
         })
 
@@ -104,11 +105,11 @@ export default {
         slideIds: [],
         slideScripts: {}
       },
-      apiService.createSlidesFromVideo(title, video)
-        .then(job => {
-          this.presentation.presentationTitle = title;
-          this.setupSlideJob(job);
-        })
+        apiService.createSlidesFromVideo(title, video)
+          .then(job => {
+            this.presentation.presentationTitle = title;
+            this.setupSlideJob(job);
+          })
     },
     submitText(text, title) {
       console.log("text uploaded", title);
@@ -133,11 +134,11 @@ export default {
         slideIds: [],
         slideScripts: {}
       },
-      apiService.createSlidesFromText(title, text)
-        .then(job => {
-          this.presentation.presentationTitle = title;
-          this.setupSlideJob(job);
-        })
+        apiService.createSlidesFromText(title, text)
+          .then(job => {
+            this.presentation.presentationTitle = title;
+            this.setupSlideJob(job);
+          })
     }
   }
 };

@@ -20,14 +20,77 @@ slidesRouter.post("/fromVideo", validateUserCredentials, validateNoActiveJobs, u
     const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
     const job = await Job.create({
         jid: jobId,
-        title,
-        userId,
-        status: "running"
+        status: "running",
+        startedAt: new Date(),
+        UserUserId: userId,
     });
     convertVideoToSlides(
         {
             filePath: file.path,
             fileName: file.filename,
+            title,
+            slidesOAuthToken: req.session.accessToken
+        },
+        (statusMessage) => {
+            req.io.emit(`slides/${jobId}/status`, statusMessage);
+        }, 
+        (presentationId) => {
+            req.io.emit(`slides/${jobId}/presentationId`, presentationId);
+        }, 
+        (slideId) => {
+            req.io.emit(`slides/${jobId}/slideReady`, slideId);
+        }, 
+        (slideId, script) => {
+            req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
+        }, 
+        async (r) => {
+            if (!r.error) {
+                const { presentationId } = r;
+                await Presentation.create({
+                    presentationId: jobId,
+                    externalId: presentationId,
+                    title,
+                    UserUserId: req.session.userId,
+                    SlidifyPresentationJobJid: jobId
+                })
+                job.status = "done";
+                const notification = await Notification.create({
+                    notificationId: `${userId}#${Date.now().toString()}${Math.floor(Math.random() * 10000)}`,
+                    actorId: userId,
+                    type: "presentation",
+                    content: {
+                        title: `Presentation "${title}" has been created.`,
+                        presentationId: jobId                
+                    },
+                    status: 1
+                })
+                sendNotification(userId, req.io, notification);
+            } else {
+                job.status = "error";
+            }
+            job.finishedAt = new Date();
+            await job.save()
+            req.io.emit(`slides/${jobId}/done`, r);
+        }
+    );
+    return res.json({msg: "Job started", id: jobId});
+})
+
+slidesRouter.post("/fromText", validateUserCredentials, validateNoActiveJobs, async (req, res) => {
+    const { text } = req.body;
+    const { title } = req.query;
+    const { userId } = req.session;
+    // TODO: store jobs and generate IDs elsewhere
+    const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
+    const job = await Job.create({
+        jid: jobId,
+        title,
+        userId,
+        status: "running"
+    });
+    convertTextToSlides(
+        {
+            text,
             title,
             slidesOAuthToken: req.session.accessToken
         },
@@ -140,7 +203,7 @@ slidesRouter.get("/", validateUserCredentials, async (req, res) => {
         const userId = req.session.userId;
         const presentations = await Presentation.findAll({
             where: {
-                userId
+                UserUserId: userId
             }
         });
         const fetchSlides = presentations.map(p => 
@@ -168,9 +231,14 @@ slidesRouter.get("/:presentationId", validateUserCredentials, async (req, res) =
     const userId = req.session.userId;
     const presentation = await Presentation.findOne({
         where: {
-            userId,
+            UserUserId: userId,
             presentationId: req.params.presentationId
-        }
+        },
+        include: [
+            {
+                model: Job,
+            }
+        ]
     });
     if (!presentation) {
         return res.status(404).json({ error: "Presentation not found" })
@@ -189,7 +257,10 @@ slidesRouter.get("/:presentationId", validateUserCredentials, async (req, res) =
                 externalId: presentation.externalId, 
                 slideIds, 
                 slideScripts,
-                createdAt: presentation.createdAt
+                createdAt: presentation.createdAt,
+                status: presentation.SlidifyPresentationJob.status,
+                jobStarted: presentation.SlidifyPresentationJob.startedAt,
+                jobFinished: presentation.SlidifyPresentationJob.finishedAt
             })
         })
 
@@ -199,7 +270,7 @@ slidesRouter.get("/jobs/active", validateUserCredentials, async (req, res) => {
     const userId = req.session.userId;
     const activeJobs = await Job.findAll({
         where: {
-            userId: userId,
+            UserUserId: userId,
             status: "running"
         }
     })
