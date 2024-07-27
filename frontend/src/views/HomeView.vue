@@ -2,7 +2,7 @@
   <v-container>
     <p>Convert from:</p>
     <v-radio-group inline v-model="inputType" hide-details="auto">
-      <v-radio label="Video" value="video"></v-radio>
+      <v-radio label="Video or Audio" value="video"></v-radio>
       <v-radio label="Text" value="text"></v-radio>
     </v-radio-group>
     <VideoUpload v-if="inputType == 'video'" :on-submit="submitVideo" />

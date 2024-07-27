@@ -5,10 +5,9 @@
         <v-col cols="12" md="5" lg="6">
           <v-file-input
             v-model="videoFile"
-            label="Upload a video"
-            placeholder="Upload a video"
+            label="Upload a video or audio file"
+            placeholder="Upload a video or audio file"
             accept=".aac,.amr,.flac,.m4a,.mp3,.mp4,.mpeg,.ogg,.wav"
-            prepend-icon="mdi-video"
             hide-details="auto"
             show-size
           ></v-file-input>
