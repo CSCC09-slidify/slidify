@@ -52,7 +52,7 @@ app.use(
     saveUninitialized: false,
     store: sessionStore,
     name: "SlidifyCookie",
-    cookie: { secure: true, sameSite: 'none', httpOnly: true,  maxAge: 1000 * 60 * 60 * 48}
+    cookie: { secure: true, sameSite: 'none', httpOnly: true,  maxAge: 1000 * 60 * 60 * 48, domain: process.env.CORS_ORIGIN }
   })
 );
 sessionStore.sync();
