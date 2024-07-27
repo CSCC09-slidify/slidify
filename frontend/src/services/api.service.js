@@ -1,7 +1,7 @@
 "use strict";
 
 // TODO: remove hardcoded API endpoint
-const BASE_URL = "http://localhost";
+const BASE_URL = process.env.VUE_APP_API_URL;
 
 const apiService = {};
 
@@ -17,13 +17,26 @@ apiService.signIn = function (code) {
   }).then((response) => response.json());
 };
 
-apiService.createSlides = function (title, file) {
+apiService.createSlidesFromVideo = function (title, file) {
   const formData = new FormData();
   formData.append("file", file);
   return fetch(BASE_URL + `/api/slides/fromVideo?title=${title}`, {
     method: "POST",
     credentials: "include",
     body: formData,
+  }).then((response) => response.json());
+};
+
+apiService.createSlidesFromText = function (title, text) {
+  return fetch(BASE_URL + `/api/slides/fromText?title=${title}`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      text: text,
+    }),
   }).then((response) => response.json());
 };
 
@@ -40,19 +53,53 @@ apiService.getSlide = function (slideId) {
   }).then((response) => response.json());
 };
 
+apiService.getSlideJobs = function () {
+  return fetch(BASE_URL + `/api/slides/jobs/active`, {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => response.json());
+};
+
+apiService.watchJob = function (jobId) {
+  return fetch(BASE_URL + `/api/slides/jobs/watch/${jobId}`, {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => response.json());
+};
+
+apiService.clearNotifications = function () {
+  return fetch(BASE_URL + `/api/notifications/readAll`, {
+    method: "POST",
+    credentials: "include",
+  }).then((response) => response.json());
+};
+
+apiService.fetchNotifications = function () {
+  return fetch(BASE_URL + `/api/notifications/active`, {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => response.json());
+};
 
 apiService.whoami = function () {
   return fetch(BASE_URL + "/api/users/whoami", {
     method: "GET",
     credentials: "include",
   }).then((response) => response.json());
-}
+};
 
 apiService.signOut = function () {
   return fetch(BASE_URL + "/api/users/signout", {
     method: "POST",
     credentials: "include",
   }).then((response) => response.json());
-}
+};
+
+apiService.getUserProfile = function () {
+  return fetch(BASE_URL + "/api/users/profile", {
+    method: "GET",
+    credentials: "include",
+  }).then((response) => response.json());
+};
 
 export default apiService;
