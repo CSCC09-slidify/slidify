@@ -93,7 +93,9 @@ export const convertSummaryToSlide = (
     id: "bullets" + index,
     text: bullets.join("\n"),
     style: {
-      fontSize: BULLET_FONT_SIZE,
+      fontSize: bullets.length <= 6 ?
+       BULLET_FONT_SIZE : 
+       Math.max(8, 20 - bullets.length),
       fontFamily: BULLET_FONT_FAMILY,
     },
     paragraphStyle: {
@@ -123,6 +125,9 @@ export const convertSummaryToSpeakerNotes = (
 export const addImagesToSlides = (slideBuilder, pageId, images) => {
   for (let i = 0; i < images.length; i++) {
     const img = images[i];
+    if (!img.image) {
+      continue;
+    }
     const { width, height } = img.image;
     const displayWidth = (SLIDE_WIDTH - 40) / 2;
     const displayHeight = SLIDE_HEIGHT - 150 - 20;
@@ -135,6 +140,7 @@ export const addImagesToSlides = (slideBuilder, pageId, images) => {
       x: 30 + (SLIDE_WIDTH - 40) / 2,
       y: 150,
     });
+    break;
   }
 };
 
