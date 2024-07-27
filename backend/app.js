@@ -33,7 +33,7 @@ try {
 }
 
 const corsOptions = {
-  origin: [process.env.CORS_ORIGIN],
+  origin: [process.env.CORS_ORIGIN, "https://slidify.live"],
   credentials: true,
 };
 app.use(cors(corsOptions));
