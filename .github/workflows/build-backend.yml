@@ -33,7 +33,6 @@ jobs:
           envkey_DATABASE_URL: ${{ secrets.B_DATABASE_URL }}
           envkey_SLIDIFY_SESSION_SECRET: ${{ secrets.B_SLIDIFY_SESSION_SECRET }}
           envkey_CORS_ORIGIN: ${{ secrets.B_CORS_ORIGIN }}
-          directory: /backend
           file_name: .env
           fail_on_empty: true
           sort_keys: false
