@@ -45,7 +45,7 @@ usersRouter.post("/signin", async (req, res) => {
     req.session.accessToken = tokens.access_token;
     req.session.refreshToken = tokens.refresh_token;
     const expiryDate = new Date(payload["exp"] * 1000);
-    console.log("Google sessions expires at: " + expiryDate.toLocaleString())
+    console.log("Google sessions expires at: " + expiryDate.toLocaleString());
     req.session.expiry = payload["exp"] * 1000;
     return res.json({
       userId: user.userId,
@@ -97,15 +97,16 @@ usersRouter.delete("/", validateUserCredentials, async (req, res) => {
   const userId = req.session.userId;
   await User.destroy({
     where: {
-      userId: userId
-    }
-  })
+      userId: userId,
+    },
+  });
   return res.status(204);
 });
 
 usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
-  oauthApi.getUserProfile({ authToken: req.session.accessToken })
-    .then(profile => {
-      res.json({profile});
-    })
-})
+  oauthApi
+    .getUserProfile({ authToken: req.session.accessToken })
+    .then((profile) => {
+      res.json({ profile });
+    });
+});

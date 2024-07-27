@@ -51,7 +51,7 @@ app.use(
     saveUninitialized: false,
     store: sessionStore,
     cookie: { secure: false },
-  })
+  }),
 );
 sessionStore.sync();
 

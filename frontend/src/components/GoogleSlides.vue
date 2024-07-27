@@ -1,7 +1,8 @@
 <template>
   <v-container class="ma-0 w-100 fill-height">
     <v-row class="w-100">
-      <a v-if="presentationId"
+      <a
+        v-if="presentationId"
         :href="getPresentationUrl(presentationId)"
         target="blank"
         class="text-decoration-none"
@@ -10,11 +11,14 @@
         <v-icon icon="mdi-open-in-new" class="ma-1"></v-icon>
       </a>
     </v-row>
-    <v-row v-if="presentationId" class="w-100 align-center justify-center fill-height">
+    <v-row
+      v-if="presentationId"
+      class="w-100 align-center justify-center fill-height"
+    >
       <iframe
         id="slideDisplay"
         :src="getIframeUrl(presentationId)"
-        frameborder="0" 
+        frameborder="0"
         class="w-100 fill-height"
       ></iframe>
     </v-row>
@@ -53,10 +57,10 @@ export default {
     //   // TODO: Investigate why sometimes the wrong slides are displayed
     //   return slideId ? `https://docs.google.com/presentation/d/${presentationId}/edit` : "";
     // },
-    getIframeUrl (presentationId) {
+    getIframeUrl(presentationId) {
       return `https://docs.google.com/presentation/d/${presentationId}/edit?rm=embedded`;
     },
-    getPresentationUrl (presentationId) {
+    getPresentationUrl(presentationId) {
       return `https://docs.google.com/presentation/d/${presentationId}`;
     },
     // nextSlide(){
@@ -67,6 +71,6 @@ export default {
     //   if (this.currentSlide > 0)
     //     this.currentSlide--;
     // }
-  }
+  },
 };
 </script>

@@ -13,17 +13,17 @@
 </template>
 <script>
 // https://cloud-c.edupage.org/cloud/1(2).gif?z:PHGlQbKKIhqvgG%2BJvkRQ3%2F9B6KF%2BEiN7dDbBdRp03N7ej%2B%2Blv4yRO0aKe7YxPNbX
-import image from "../assets/spinner.gif"
+import image from "../assets/spinner.gif";
 
 export default {
-    props: {
-        loadingMessage: {
-            type: String
-        }
+  props: {
+    loadingMessage: {
+      type: String,
     },
-    data: () => ({
-        image,
-        text: ""
-    })
-}
+  },
+  data: () => ({
+    image,
+    text: "",
+  }),
+};
 </script>

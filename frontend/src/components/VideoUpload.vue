@@ -14,10 +14,15 @@
           ></v-file-input>
         </v-col>
         <v-col cols="12" md="4" lg="4">
-          <TextInput label="Presentation Title" v-model="title"/>
+          <TextInput label="Presentation Title" v-model="title" />
         </v-col>
         <v-col class="flex-grow-0">
-          <v-btn @click="handleSubmit" type="submit" :disabled="!videoFile || !title">Generate Slides</v-btn>
+          <v-btn
+            @click="handleSubmit"
+            type="submit"
+            :disabled="!videoFile || !title"
+            >Generate Slides</v-btn
+          >
         </v-col>
       </v-row>
     </v-container>
@@ -32,7 +37,7 @@ export default {
     videoFile: null,
   }),
   components: {
-    TextInput
+    TextInput,
   },
   props: ["onSubmit"],
   methods: {

@@ -8,15 +8,24 @@
     <VideoUpload v-if="inputType == 'video'" :on-submit="submitVideo" />
     <TextUpload v-if="inputType == 'text'" :on-submit="submitText" />
     <ErrorMessage v-if="error.hasError" :message="error.message" />
-  <GoogleSlides v-if="presentation.presentationId" :slide-ids="presentation.slideIds"
-    :presentation-title="presentation.presentationTitle" :presentation-id="presentation.presentationId"
-    :slide-scripts="presentation.slideScripts" class="w-100 fill-height" />
-  <v-row class="align-center justify-center pa-4">
-    <v-col v-if="isLoading" :cols="12" :md="presentation.presentationId ? 4 : 12"
-      :lg="presentation.presentationId ? 4 : 12">
-      <LoadingSpinner :loading-message="loadingMessage" />
-    </v-col>
-  </v-row>
+    <GoogleSlides
+      v-if="presentation.presentationId"
+      :slide-ids="presentation.slideIds"
+      :presentation-title="presentation.presentationTitle"
+      :presentation-id="presentation.presentationId"
+      :slide-scripts="presentation.slideScripts"
+      class="w-100 fill-height"
+    />
+    <v-row class="align-center justify-center pa-4">
+      <v-col
+        v-if="isLoading"
+        :cols="12"
+        :md="presentation.presentationId ? 4 : 12"
+        :lg="presentation.presentationId ? 4 : 12"
+      >
+        <LoadingSpinner :loading-message="loadingMessage" />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -43,7 +52,7 @@ export default {
     loadingMessage: "",
     error: {
       hasError: false,
-      message: ""
+      message: "",
     },
     presentation: {
       presentationId: "",
@@ -53,9 +62,9 @@ export default {
       externalId: "",
       status: "",
       jobStarted: "",
-      jobFinished: ""
+      jobFinished: "",
     },
-    inputType: "video"
+    inputType: "video",
   }),
   methods: {
     setupSlideJob(job) {
@@ -66,32 +75,32 @@ export default {
           if (res.error) {
             this.error = {
               hasError: true,
-              message: res.error
-            }
+              message: res.error,
+            };
           }
-          console.log(this.presentation.slideScripts)
-        })
+          console.log(this.presentation.slideScripts);
+        });
 
         websocket.on(`slides/${job.id}/status`, (status) => {
           this.loadingMessage = status;
-        })
+        });
 
         websocket.on(`slides/${job.id}/slideReady`, (slideId) => {
           this.presentation.slideIds.push(slideId);
-        })
+        });
 
         websocket.on(`slides/${job.id}/scriptReady`, ({ slideId, script }) => {
           this.presentation.slideScripts[slideId] = script;
-        })
+        });
 
         websocket.on(`slides/${job.id}/presentationId`, (presentationId) => {
           this.presentation.presentationId = presentationId;
-        })
+        });
       } else {
         this.error = {
           hasError: true,
-          message: job ? job.error : ""
-        }
+          message: job ? job.error : "",
+        };
       }
     },
     submitVideo(video, title) {
@@ -99,47 +108,45 @@ export default {
       // TODO: input token
       this.isLoading = true;
       this.error.hasError = false;
-      this.presentation = {
+      (this.presentation = {
         presentation: null,
         presentationTitle: "",
         slideIds: [],
-        slideScripts: {}
-      },
-        apiService.createSlidesFromVideo(title, video)
-          .then(job => {
-            this.presentation.presentationTitle = title;
-            this.setupSlideJob(job);
-          })
+        slideScripts: {},
+      }),
+        apiService.createSlidesFromVideo(title, video).then((job) => {
+          this.presentation.presentationTitle = title;
+          this.setupSlideJob(job);
+        });
     },
     submitText(text, title) {
       console.log("text uploaded", title);
       if (text.split(" ").length < 200) {
         this.error = {
           hasError: true,
-          message: "Text must be at least 200 words long"
-        }
-        return
+          message: "Text must be at least 200 words long",
+        };
+        return;
       } else if (text.split(" ").length > 1000) {
         this.error = {
           hasError: true,
-          message: "Text must be less than 1000 words long"
-        }
-        return
+          message: "Text must be less than 1000 words long",
+        };
+        return;
       }
       this.isLoading = true;
       this.error.hasError = false;
-      this.presentation = {
+      (this.presentation = {
         presentation: null,
         presentationTitle: "",
         slideIds: [],
-        slideScripts: {}
-      },
-        apiService.createSlidesFromText(title, text)
-          .then(job => {
-            this.presentation.presentationTitle = title;
-            this.setupSlideJob(job);
-          })
-    }
-  }
+        slideScripts: {},
+      }),
+        apiService.createSlidesFromText(title, text).then((job) => {
+          this.presentation.presentationTitle = title;
+          this.setupSlideJob(job);
+        });
+    },
+  },
 };
 </script>

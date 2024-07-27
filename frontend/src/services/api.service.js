@@ -32,10 +32,10 @@ apiService.createSlidesFromText = function (title, text) {
     method: "POST",
     credentials: "include",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      text: text
+      text: text,
     }),
   }).then((response) => response.json());
 };
@@ -72,34 +72,34 @@ apiService.clearNotifications = function () {
     method: "POST",
     credentials: "include",
   }).then((response) => response.json());
-}
+};
 
 apiService.fetchNotifications = function () {
   return fetch(BASE_URL + `/api/notifications/active`, {
     method: "GET",
     credentials: "include",
   }).then((response) => response.json());
-}
+};
 
 apiService.whoami = function () {
   return fetch(BASE_URL + "/api/users/whoami", {
     method: "GET",
     credentials: "include",
   }).then((response) => response.json());
-}
+};
 
 apiService.signOut = function () {
   return fetch(BASE_URL + "/api/users/signout", {
     method: "POST",
     credentials: "include",
   }).then((response) => response.json());
-}
+};
 
 apiService.getUserProfile = function () {
   return fetch(BASE_URL + "/api/users/profile", {
     method: "GET",
     credentials: "include",
   }).then((response) => response.json());
-}
+};
 
 export default apiService;

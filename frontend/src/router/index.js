@@ -26,8 +26,8 @@ const router = createRouter({
           name: "landing",
           component: LandingView,
         },
-      ]
-    }
+      ],
+    },
   ],
 });
 

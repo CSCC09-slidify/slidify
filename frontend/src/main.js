@@ -24,9 +24,9 @@ const vuetify = createVuetify({
     sets: {
       fa,
       mdi,
-      md
-    }
-  }
+      md,
+    },
+  },
 });
 
 const app = createApp(App);
