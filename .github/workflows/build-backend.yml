@@ -3,7 +3,7 @@ name: Publish Express Backend to GHCR
 on:
   push:
     branches:
-      - deployment
+      - main
     paths:
       - backend/**
   workflow_dispatch:

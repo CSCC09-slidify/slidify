@@ -3,7 +3,7 @@ name: Publish Vue Skeleton to GHCR
 on:
   push:
     branches:
-      - deployment
+      - main
     paths:
       - frontend/**
   workflow_dispatch:
