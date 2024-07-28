@@ -32,6 +32,7 @@ try {
   console.error("Unable to connect to the database:", error);
 }
 
+app.set("trust proxy", 1);
 const corsOptions = {
   origin: [process.env.CORS_ORIGIN],
   credentials: true,
@@ -50,8 +51,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
-    cookie: { secure: false },
-  }),
+    cookie: { secure: false, domain: "." + process.env.APP_DOMAIN },
+  })
 );
 sessionStore.sync();
 

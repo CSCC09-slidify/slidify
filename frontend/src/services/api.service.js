@@ -44,6 +44,7 @@ apiService.createSlidesFromText = function (title, text) {
 apiService.getSlides = function () {
   return fetch(BASE_URL + `/api/slides`, {
     method: "GET",
+    credentials: "include",
   }).then((response) => response.json());
 };
 
