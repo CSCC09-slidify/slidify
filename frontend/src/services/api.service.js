@@ -8,6 +8,7 @@ const apiService = {};
 apiService.signIn = function (code) {
   return fetch(BASE_URL + "/api/users/signin", {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
