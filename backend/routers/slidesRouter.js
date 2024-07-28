@@ -13,7 +13,7 @@ import { Job } from "../models/job.js";
 import { Notification } from "../models/notification.js";
 import slidesApi from "../tools/slides/api.js";
 import { sendNotification } from "../tools/notifications.js";
-
+import { UserSettings } from "../models/userSettings.js";
 const upload = multer({ dest: "uploads/" });
 
 export const slidesRouter = Router();
@@ -27,6 +27,11 @@ slidesRouter.post(
     const file = req.file;
     const { title } = req.query;
     const { userId } = req.session;
+    const userSettings = await UserSettings.findOne({
+      where: {
+        UserUserId: userId
+      }
+    })
     // TODO: store jobs and generate IDs elsewhere
     const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
     const job = await Job.create({
@@ -41,6 +46,7 @@ slidesRouter.post(
         fileName: file.filename,
         title,
         slidesOAuthToken: req.session.accessToken,
+        config: userSettings.config
       },
       (statusMessage) => {
         req.io.emit(`slides/${jobId}/status`, statusMessage);
@@ -96,6 +102,11 @@ slidesRouter.post(
     const { text } = req.body;
     const { title } = req.query;
     const { userId } = req.session;
+    const userSettings = await UserSettings.findOne({
+      where: {
+        UserUserId: userId
+      }
+    })
     // TODO: store jobs and generate IDs elsewhere
     const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
     const job = await Job.create({
@@ -109,6 +120,7 @@ slidesRouter.post(
         text,
         title,
         slidesOAuthToken: req.session.accessToken,
+        config: userSettings.config
       },
       (statusMessage) => {
         req.io.emit(`slides/${jobId}/status`, statusMessage);
