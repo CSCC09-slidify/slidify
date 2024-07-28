@@ -37,6 +37,9 @@ jobs:
           fail_on_empty: true
           sort_keys: false
 
+      - name: List files
+        run: ls -la
+
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
