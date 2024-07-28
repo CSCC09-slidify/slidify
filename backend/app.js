@@ -34,10 +34,11 @@ try {
 
 app.set("trust proxy", 1);
 const corsOptions = {
-  origin: [process.env.CORS_ORIGIN],
+  origin: [process.env.CORS_ORIGIN, "https://slidify.live", , "https://slidifylabs.live"],
   credentials: true,
 };
 app.use(cors(corsOptions));
+app.set("trust proxy", 1);
 
 const sequelizeSessionStore = sequelizeStore(session.Store);
 const sessionStore = new sequelizeSessionStore({
@@ -46,7 +47,7 @@ const sessionStore = new sequelizeSessionStore({
 });
 app.use(
   session({
-    secret: process.env.SLIDIFY_SESSION_SECRET,
+    secret: process.env.SLIDIFY_SESSION_SECRET ?? "slidifysecret",
     proxy: true,
     resave: false,
     saveUninitialized: false,
@@ -61,6 +62,8 @@ registerIOListeners(io);
 
 app.use((req, res, next) => {
   console.log("HTTP request", req.method, req.url, req.body);
+  console.log(req.session)
+  console.log(req.sessionID)
   req.io = io;
   next();
 });

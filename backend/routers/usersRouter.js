@@ -80,7 +80,7 @@ usersRouter.get("/whoami", async (req, res) => {
   const user = await User.findByPk(req.session.userId);
   if (!user) {
     return res.status(401).json({
-      error: "User not authenticated",
+      error: "User not authenticated: invalid session",
     });
   } else if (req.session.expiry < Date.now()) {
     return res.status(401).json({
