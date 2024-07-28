@@ -28,6 +28,7 @@ jobs:
           envkey_VUE_APP_GOOGLE_REDIRECT_URI: ${{ secrets.F_GOOGLE_REDIRECT_URI }}
           envkey_VUE_APP_API_URL: ${{ secrets.F_API_URL }}
           envkey_VUE_APP_API_SOCKET_URL: ${{ secrets.F_API_SOCKET_URL }}
+          directory: frontend
           file_name: .env.local
           fail_on_empty: true
           sort_keys: false
