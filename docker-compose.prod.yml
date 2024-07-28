@@ -42,19 +42,18 @@ services:
     environment:
       - VIRTUAL_HOST=api.slidify.live
       - LETSENCRYPT_HOST=api.slidify.live
-      - DATABASE_URL=postgres://user:password@db:5432/db
     depends_on:
       db:
         condition: service_healthy
   db:
     image: postgres:16
-    container_name: db
+    container_name: postgres-db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d db -U user"]
+      test: ["CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
       start_interval: 5s
       start_period: 15s
       retries: 5
