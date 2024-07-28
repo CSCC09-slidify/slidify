@@ -1,8 +1,15 @@
 import { sequelize } from "../datasource.js";
 import { DataTypes } from "sequelize";
+import { User } from "./user.js";
+import { Job } from "./job.js";
 
 export const Presentation = sequelize.define("PresentationData", {
-  userId: {
+  presentationId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  externalId: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -10,13 +17,10 @@ export const Presentation = sequelize.define("PresentationData", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  externalId: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  presentationId: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    primaryKey: true
-  }
 });
+
+Presentation.belongsTo(User);
+User.hasMany(Presentation);
+
+Presentation.belongsTo(Job);
+Job.hasOne(Presentation);

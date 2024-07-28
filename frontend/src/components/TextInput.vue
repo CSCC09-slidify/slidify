@@ -1,6 +1,6 @@
 <template>
-  <v-text-field 
-    :label="label" 
+  <v-text-field
+    :label="label"
     prepend-icon="mdi-file-presentation-box"
     hide-details="auto"
     clearable
@@ -8,10 +8,10 @@
 </template>
 <script>
 export default {
-    props: {
-        label: {
-            type: String
-        }
-    }
-}
+  props: {
+    label: {
+      type: String,
+    },
+  },
+};
 </script>

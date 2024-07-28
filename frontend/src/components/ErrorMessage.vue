@@ -1,8 +1,9 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <v-alert icon="$warning" 
-        color="error" 
+      <v-alert
+        icon="$warning"
+        color="error"
         :text="message ? message : `There was a problem with your request`"
       >
       </v-alert>
@@ -10,12 +11,11 @@
   </v-container>
 </template>
 <script>
-
 export default {
-    props: {
-        message: {
-            type: String
-        }
-    }
-}
+  props: {
+    message: {
+      type: String,
+    },
+  },
+};
 </script>

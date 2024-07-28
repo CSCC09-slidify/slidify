@@ -1,3 +1,8 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
 
-export const sequelize = new Sequelize(process.env.DATABASE_URL ?? "postgres://postgres:password@146.148.63.108/slidify_db?sslmode=disable");
+dotenv.config();
+
+export const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+});

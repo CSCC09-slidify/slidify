@@ -1,5 +1,5 @@
 export const convertSpeechmaticsSummary = (resp) => {
-    /*
+  /*
         Speechmatics summary is of the form:
 
         1. title1
@@ -10,27 +10,27 @@ export const convertSpeechmaticsSummary = (resp) => {
         - bullet1
         - bullet2
     */
-    const summary = resp.summary.content;
-    const lines = summary.split("\n")
-    const sectionHeaderRegex = new RegExp("\\d\\. .*")
-    const bulletRegex = new RegExp("- .*")
+  const summary = resp.summary.content;
+  const lines = summary.split("\n");
+  const sectionHeaderRegex = new RegExp("\\d\\. .*");
+  const bulletRegex = new RegExp("- .*");
 
-    const convertedSummary = lines.reduce((acc, line) => {
-        const trimmed = line.trim();
-        if (trimmed != "") {
-            if (sectionHeaderRegex.test(trimmed)) {
-                acc.push({
-                    sectionTitle: trimmed,
-                    bullets: []
-                })
-            } else if (bulletRegex.test(trimmed)) {
-                acc[acc.length - 1].bullets.push(trimmed.slice(2));
-            }
-        }
-        return acc
-    }, [])
+  const convertedSummary = lines.reduce((acc, line) => {
+    const trimmed = line.trim();
+    if (trimmed != "") {
+      if (sectionHeaderRegex.test(trimmed)) {
+        acc.push({
+          sectionTitle: trimmed.split(" ").slice(1).join(" "),
+          bullets: [],
+        });
+      } else if (bulletRegex.test(trimmed)) {
+        acc[acc.length - 1].bullets.push(trimmed.slice(2));
+      }
+    }
+    return acc;
+  }, []);
 
-    /*
+  /*
         "chapters": [
     {
         "end_time": 28.97,
@@ -55,52 +55,54 @@ export const convertSpeechmaticsSummary = (resp) => {
         },
     */
 
-    const chapters = resp.chapters;
-    console.log("Returned chapters are:")
-    console.log(chapters)
-    if (convertedSummary.length < chapters.length) {
-        const extra = chapters.length - convertedSummary.length;
-        console.log("there is " + extra + " extra")
-        const mergeLength = Math.ceil(extra / convertedSummary.length);
-        for (let i = 0; i < extra && i + mergeLength < chapters.length; i++) {
-            chapters[i].end_time = chapters[i + mergeLength].end_time;
-            chapters.splice(i + 1, mergeLength);
-        }
+  const chapters = resp.chapters;
+  console.log("Returned chapters are:");
+  console.log(chapters);
+  if (convertedSummary.length < chapters.length) {
+    const extra = chapters.length - convertedSummary.length;
+    console.log("there is " + extra + " extra");
+    const mergeLength = Math.ceil(extra / convertedSummary.length);
+    for (let i = 0; i < extra && i + mergeLength < chapters.length; i++) {
+      chapters[i].end_time = chapters[i + mergeLength].end_time;
+      chapters.splice(i + 1, mergeLength);
     }
-    const transcription = resp.results;
-    const fullScript = transcription.reduce((acc, cur) => {
-        if (cur.alternatives.length > 0) {
-            const content = cur.alternatives[0].content;
-            if (cur.type == "word") {
-                return acc + " " + content;
-            } else if (cur.type == "punctuation") {
-                return acc + content;
-            }
+  }
+  const transcription = resp.results;
+  const fullScript = transcription.reduce((acc, cur) => {
+    if (cur.alternatives.length > 0) {
+      const content = cur.alternatives[0].content;
+      if (cur.type == "word") {
+        return acc + " " + content;
+      } else if (cur.type == "punctuation") {
+        return acc + content;
+      }
+    }
+    return acc;
+  }, "");
+  console.log("Full script is");
+  console.log(fullScript);
+  for (let i = 0; i < Math.min(convertedSummary.length, chapters.length); i++) {
+    const chapter = chapters[i];
+    const start = chapter["start_time"];
+    const end = chapter["end_time"];
+    convertedSummary[i].startTime = start;
+    convertedSummary[i].endTime = end;
+    const interval = transcription.filter(
+      (t) => t.start_time >= start && t.end_time <= end,
+    );
+    const script = interval.reduce((acc, cur) => {
+      if (cur.alternatives.length > 0) {
+        const content = cur.alternatives[0].content;
+        if (cur.type == "word") {
+          return acc + " " + content;
+        } else if (cur.type == "punctuation") {
+          return acc + content;
         }
-        return acc;
+      }
+      return acc;
     }, "");
-    console.log("Full script is")
-    console.log(fullScript)
-    for (let i = 0; i < Math.min(convertedSummary.length, chapters.length); i++) {
-        const chapter = chapters[i];
-        const start = chapter["start_time"];
-        const end = chapter["end_time"];
-        convertedSummary[i].startTime = start;
-        convertedSummary[i].endTime = end;
-        const interval = transcription.filter(t => t.start_time >= start && t.end_time <= end);
-        const script = interval.reduce((acc, cur) => {
-            if (cur.alternatives.length > 0) {
-                const content = cur.alternatives[0].content;
-                if (cur.type == "word") {
-                    return acc + " " + content;
-                } else if (cur.type == "punctuation") {
-                    return acc + content;
-                }
-            }
-            return acc;
-        }, "");
-        convertedSummary[i].transcription = script;
-    }
+    convertedSummary[i].transcription = script;
+  }
 
-    return convertedSummary;
-}
+  return convertedSummary;
+};

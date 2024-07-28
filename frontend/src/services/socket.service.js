@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
 
-const socket = new io("https://backend-app-f3w7geeriq-uc.a.run.app");
+const socket = new io(process.env.VUE_APP_API_SOCKET_URL);
 
 export const websocket = socket;

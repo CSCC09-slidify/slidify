@@ -32,6 +32,7 @@ try {
   console.error("Unable to connect to the database:", error);
 }
 
+app.set("trust proxy", 1);
 const corsOptions = {
   origin: [process.env.CORS_ORIGIN, "https://slidify.live", , "https://slidifylabs.live"],
   credentials: true,
@@ -51,7 +52,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
-    cookie: { secure: true, sameSite: 'none',  same_site: 'none', httpOnly: false,  maxAge: 1000 * 60 * 60 * 48, domain: process.env.CORS_ORIGIN }
+    cookie: { secure: false, domain: "." + process.env.APP_DOMAIN },
   })
 );
 sessionStore.sync();

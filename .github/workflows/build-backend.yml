@@ -1,0 +1,63 @@
+name: Publish Express Backend to GHCR
+
+on:
+  push:
+    branches:
+      - deployment
+    paths:
+      - backend/**
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: backend-project-mac
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create .env.local file
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
+          envkey_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          envkey_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          envkey_GOOGLE_REDIRECT_URI: ${{ secrets.B_GOOGLE_REDIRECT_URI }}
+          envkey_SPEECHMATICS_API_KEY: ${{ secrets.B_SPEECHMATICS_API_KEY }}
+          envkey_CUSTOM_SEARCH_API_KEY: ${{ secrets.B_CUSTOM_SEARCH_API_KEY }}
+          envkey_CUSTOM_SEARCH_ENGINE_ID: ${{ secrets.B_CUSTOM_SEARCH_ENGINE_ID }}
+          envkey_DATABASE_URL: ${{ secrets.B_DATABASE_URL }}
+          envkey_SLIDIFY_SESSION_SECRET: ${{ secrets.B_SLIDIFY_SESSION_SECRET }}
+          envkey_CORS_ORIGIN: ${{ secrets.B_CORS_ORIGIN }}
+          directory: backend
+          file_name: .env
+          fail_on_empty: true
+          sort_keys: false
+
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+
+      - name: Log into GitHub Container Registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image to GitHub Container Registry
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION

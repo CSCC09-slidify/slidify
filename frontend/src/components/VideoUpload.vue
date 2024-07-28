@@ -5,19 +5,23 @@
         <v-col cols="12" md="5" lg="6">
           <v-file-input
             v-model="videoFile"
-            label="Upload a video"
-            placeholder="Upload a video"
+            label="Upload a video or audio file"
+            placeholder="Upload a video or audio file"
             accept=".aac,.amr,.flac,.m4a,.mp3,.mp4,.mpeg,.ogg,.wav"
-            prepend-icon="mdi-video"
             hide-details="auto"
             show-size
           ></v-file-input>
         </v-col>
         <v-col cols="12" md="4" lg="4">
-          <TextInput label="Presentation Title" v-model="title"/>
+          <TextInput label="Presentation Title" v-model="title" />
         </v-col>
         <v-col class="flex-grow-0">
-          <v-btn @click="handleSubmit" type="submit" :disabled="!videoFile || !title">Generate Slides</v-btn>
+          <v-btn
+            @click="handleSubmit"
+            type="submit"
+            :disabled="!videoFile || !title"
+            >Generate Slides</v-btn
+          >
         </v-col>
       </v-row>
     </v-container>
@@ -30,10 +34,9 @@ export default {
   data: () => ({
     title: null,
     videoFile: null,
-    websocket: null
   }),
   components: {
-    TextInput
+    TextInput,
   },
   props: ["onSubmit"],
   methods: {

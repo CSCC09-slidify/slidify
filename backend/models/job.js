@@ -3,20 +3,22 @@ import { DataTypes } from "sequelize";
 import { User } from "./user.js";
 
 export const Job = sequelize.define("SlidifyPresentationJob", {
-    jid: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    title: {
-        type: DataTypes.STRING
-    },
-    status: {
-        type: DataTypes.STRING
-    },
-    userId: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
+  jid: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  status: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  startedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  finishedAt: {
+    type: DataTypes.DATE,
+  },
 });
 
 User.hasMany(Job);
