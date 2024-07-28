@@ -1,7 +1,7 @@
 <template>
-  <div class="d-flex flex-column mx-4 fill-height">
-    <div class="pa-1" v-if="presentation.presentationId">
-      <h1>{{ presentation.presentationTitle }}</h1>
+  <div class="px-8 h-100 d-flex flex-column align-stretch">
+    <div v-if="presentation.presentationId">
+      <h1 class="font-weight-medium" >{{ presentation.presentationTitle }}</h1>
       <div class="text-subtitle-1">
         <strong>Status:</strong> {{ presentation.status }}
       </div>
@@ -15,7 +15,7 @@
       :presentation-title="presentation.presentationTitle"
       :presentation-id="presentation.externalId"
       :slide-scripts="presentation.slideScripts"
-      class="w-100 fill-height"
+      class="pb-4"
     />
     <div
       v-if="isLoading"

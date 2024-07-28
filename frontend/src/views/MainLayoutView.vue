@@ -19,7 +19,6 @@
       v-model="drawer"
       :permanent="!$vuetify.display.mobile"
       class="d-flex flex-column"
-      :location="$vuetify.display.mobile ? 'bottom' : undefined"
       :style="{ background: $vuetify.theme.themes.slidifyTheme.colors.surface }"
     >
       <SlidesHistory :slidesHistory="slidesHistory" />
@@ -65,7 +64,7 @@
       />
       <v-btn icon="mdi-dots-vertical"></v-btn>
     </v-app-bar>
-    <v-main class="p-5">
+    <v-main>
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -242,9 +241,9 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 a {
   text-decoration: none;
-  color: black;
+  color: rgb(117, 0, 98);
 }
 </style>
