@@ -4,6 +4,8 @@ on:
     workflows: ["Publish Vue Skeleton to GHCR", "Publish Express Backend to GHCR"]
     types:
       - completed
+  workflow_dispatch:
+
 jobs:
   build:
     name: Build
