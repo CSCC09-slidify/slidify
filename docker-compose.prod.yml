@@ -23,7 +23,7 @@ services:
     environment:
       - DEFAULT_EMAIL=amym.li@mail.utoronto.ca
   frontend:
-    image: ghcr.io/utsc-cscc09-programming-on-the-web/frontend-project-mac:deployment
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/frontend-project-mac:latest
     container_name: frontend
     restart: always
     expose:
@@ -34,7 +34,7 @@ services:
     depends_on:
       - backend
   backend:
-    image: ghcr.io/utsc-cscc09-programming-on-the-web/backend-project-mac:deployment
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/backend-project-mac:latest
     container_name: backend
     restart: always
     expose:
