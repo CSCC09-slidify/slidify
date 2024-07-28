@@ -38,7 +38,8 @@ jobs:
           sort_keys: false
 
       - name: List files
-        run: ls -la
+        run: ls -la ..
+
 
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
