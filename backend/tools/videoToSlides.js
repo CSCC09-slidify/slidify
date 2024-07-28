@@ -16,7 +16,7 @@ import OpenAI from "openai";
 
 // returns { presentationId, numSlides }
 export const convertVideoToSlides = async (
-  { filePath, fileName, file, title, slidesOAuthToken },
+  { filePath, fileName, file, title, slidesOAuthToken, config },
   updateStatus,
   presentationIdReady,
   slideReady,
@@ -44,6 +44,7 @@ export const convertVideoToSlides = async (
             videoApi.getVideoSummary(id, videoToken).then((results) => {
               parseSummary(
                 convertSpeechmaticsSummary(results),
+                config,
                 slidesOAuthToken,
                 title,
                 updateStatus,
@@ -81,7 +82,7 @@ export const convertVideoToSlides = async (
 };
 
 export const convertTextToSlides = async (
-  { text, title, slidesOAuthToken },
+  { text, title, slidesOAuthToken, config },
   updateStatus,
   presentationIdReady,
   slideReady,
@@ -121,6 +122,7 @@ export const convertTextToSlides = async (
   }
   parseSummary(
     parsed,
+    config,
     slidesOAuthToken,
     title,
     updateStatus,
@@ -133,6 +135,7 @@ export const convertTextToSlides = async (
 
 export const parseSummary = async (
   summary,
+  config,
   slidesOAuthToken,
   title,
   updateStatus,
@@ -141,6 +144,8 @@ export const parseSummary = async (
   scriptReady,
   next,
 ) => {
+  console.log("Config is")
+  console.log(config)
   const { presentationId } = await slidesApi.createPresentation({
     authToken: slidesOAuthToken,
     title: title,
@@ -153,7 +158,7 @@ export const parseSummary = async (
     console.log("Presentation id is " + presentationId);
     updateStatus("Building Slides");
     const slideBuilder = SlideBuilder();
-    convertTitleToSlides(slideBuilder, title);
+    convertTitleToSlides(slideBuilder, config, title);
     await slidesApi.updatePresentation(
       slidesOAuthToken,
       presentationId,
@@ -167,33 +172,29 @@ export const parseSummary = async (
       const s = summary[i];
       const summarySlideBuilder = SlideBuilder();
       const slideId = `slide${i}`;
-      convertSummaryToSlide(summarySlideBuilder, s, slideId, i);
+      convertSummaryToSlide(summarySlideBuilder, config, s, slideId, i);
       const requests = summarySlideBuilder.buildRequests();
       await slidesApi.updatePresentation(
         slidesOAuthToken,
         presentationId,
         requests,
       );
-
       const images1 = await imagesApi.searchImages({
         apiKey: process.env.CUSTOM_SEARCH_API_KEY,
         searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
         query: s.sectionTitle,
       });
-      console.log("Fetched images");
-      console.log(images1);
+      console.log("Fetched images for " + s.sectionTitle)
       const secondTry = await imagesApi.searchImages({
         apiKey: process.env.CUSTOM_SEARCH_API_KEY,
         searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
         query: s.bullets[0],
       });
-      const images = images1.concat(secondTry);
-      console.log(images);
+      const images = (images1 ?? []).concat(secondTry ?? []);
       for (let im = 0; im < images.length; im++) {
         if (!images[im].image) continue;
-        if (imagesUsed.indexOf(images[im]) != -1) continue;
         const imagesSlideBuilder = SlideBuilder();
-        addImagesToSlides(imagesSlideBuilder, slideId, [images[im]]);
+        addImagesToSlides(imagesSlideBuilder, config, slideId, [images[im]]);
         const requests = imagesSlideBuilder.buildRequests();
         const imgRes = await slidesApi.updatePresentation(
           slidesOAuthToken,
@@ -201,6 +202,7 @@ export const parseSummary = async (
           requests,
         );
         if (!imgRes.error) {
+          console.log("Using image " + im)
           imagesUsed.push(images[im]);
           break;
         }

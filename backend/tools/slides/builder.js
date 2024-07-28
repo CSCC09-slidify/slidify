@@ -1,10 +1,10 @@
 export function SlideBuilder() {
   const requests = [];
 
-  const transform = ({ x, y }) => {
+  const transform = ({ x, y, scaleX = 1, scaleY = 1}) => {
     return {
-      scaleX: 1,
-      scaleY: 1,
+      scaleX,
+      scaleY,
       shearX: 0,
       shearY: 0,
       translateX: x,
@@ -39,14 +39,14 @@ export function SlideBuilder() {
     return {
       foregroundColor: {
         opaqueColor: {
-          rgbColor: foreground ?? { red: 0, blue: 0, green: 0 },
+          rgbColor: foreground ? {red: foreground.r / 255, blue: foreground.b / 255, green: foreground.g / 255} : { red: 0, blue: 0, green: 0 },
         },
       },
-      backgroundColor: {
+      backgroundColor: background ? {
         opaqueColor: {
-          rgbColor: background ?? { red: 1, blue: 1, green: 1 },
+          rgbColor: { red: 1, blue: 1, green: 1 },
         },
-      },
+      } : null,
       fontSize: {
         magnitude: fontSize,
         unit: "PT",
@@ -141,6 +141,8 @@ export function SlideBuilder() {
     height,
     x,
     y,
+    scaleX,
+    scaleY
   }) => {
     requests.push({
       createImage: {
@@ -148,7 +150,7 @@ export function SlideBuilder() {
         url,
         elementProperties: {
           pageObjectId: pageId,
-          size: size({ width, height }),
+          size: size({ width, height, scaleX, scaleY }),
           transform: transform({ x, y }),
         },
       },
@@ -237,6 +239,32 @@ export function SlideBuilder() {
     });
   };
 
+  const setBackground = ({
+    id = "a" + parseInt(Math.random().toString() * 1000000),
+    colour,
+    image
+  }) => {
+    requests.push({
+      updatePageProperties: {
+        objectId: id,
+        pageProperties: {
+          pageBackgroundFill: {
+            propertyState: "RENDERED",
+            solidFill: colour ? {
+                color: {
+                  rgbColor: {red: colour.r / 255, blue: colour.b / 255, green: colour.g / 255}
+                }
+              } : null,
+            stretchedPictureFill: image ? {
+              contentUrl: image.link
+            } : null
+          },
+        },
+        fields: colour ? "pageBackgroundFill.solidFill.color" : "pageBackgroundFill.stretchedPictureFill"
+      },
+    });
+  }
+
   return {
     createSlide,
     addImage,
@@ -245,6 +273,7 @@ export function SlideBuilder() {
     addBulletsText,
     addSpeakerNotes,
     changeTextStyle,
+    setBackground,
     addVideo: () => {},
     addLine: () => {},
     buildRequests: () => {
