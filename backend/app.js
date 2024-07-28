@@ -51,8 +51,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
-    cookie: { secure: false },
-  }),
+    cookie: { secure: false, domain: "." + process.env.APP_DOMAIN },
+  })
 );
 sessionStore.sync();
 

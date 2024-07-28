@@ -24,6 +24,7 @@ jobs:
       - name: Create .env.local file
         uses: SpicyPizza/create-envfile@v2.0
         with:
+          envkey_APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
           envkey_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           envkey_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           envkey_GOOGLE_REDIRECT_URI: ${{ secrets.B_GOOGLE_REDIRECT_URI }}
