@@ -93,9 +93,10 @@ export const convertSummaryToSlide = (
     id: "bullets" + index,
     text: bullets.join("\n"),
     style: {
-      fontSize: bullets.length <= 6 ?
-       BULLET_FONT_SIZE : 
-       Math.max(8, 20 - bullets.length),
+      fontSize:
+        bullets.length <= 6
+          ? BULLET_FONT_SIZE
+          : Math.max(8, 20 - bullets.length),
       fontFamily: BULLET_FONT_FAMILY,
     },
     paragraphStyle: {
