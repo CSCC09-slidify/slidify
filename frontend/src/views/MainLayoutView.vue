@@ -17,7 +17,6 @@
     <v-navigation-drawer
       v-if="isAuthenticated && showMainLayout"
       v-model="drawer"
-      :permanent="!$vuetify.display.mobile"
       class="d-flex flex-column"
       :style="{ background: $vuetify.theme.themes.slidifyTheme.colors.surface }"
     >
@@ -91,7 +90,7 @@ export default {
   },
   data: () => ({
     isAuthenticated: false,
-    drawer: true,
+    drawer: false,
     slidesHistory: [],
     notification: {
       active: false,
@@ -228,6 +227,7 @@ export default {
   },
 
   created() {
+    this.drawer = !this.$vuetify.display.mobile;
     this.updateAuthStatus(this.displayLogin);
     this.fetchSlidesHistory();
     const route = useRoute();
