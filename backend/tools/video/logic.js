@@ -20,7 +20,7 @@ export const convertSpeechmaticsSummary = (resp) => {
     if (trimmed != "") {
       if (sectionHeaderRegex.test(trimmed)) {
         acc.push({
-          sectionTitle: trimmed,
+          sectionTitle: trimmed.split(" ").slice(1).join(" "),
           bullets: [],
         });
       } else if (bulletRegex.test(trimmed)) {

@@ -175,14 +175,25 @@ export const parseSummary = async (
         requests,
       );
 
-      const images = await imagesApi.searchImages({
+      const images1 = await imagesApi.searchImages({
         apiKey: process.env.CUSTOM_SEARCH_API_KEY,
         searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
-        query: s.sectionTitle.slice(2),
+        query: s.sectionTitle,
       });
+      console.log("Fetched images")
+      console.log(images1)
+      const secondTry = await imagesApi.searchImages({
+        apiKey: process.env.CUSTOM_SEARCH_API_KEY,
+        searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
+        query: s.bullets[0],
+      });
+      const images = images1.concat(secondTry);
+      console.log(images)
       for (let im = 0; im < images.length; im++) {
+        if (!images[im].image) continue;
+        if (imagesUsed.indexOf(images[im]) != -1) continue;
         const imagesSlideBuilder = SlideBuilder();
-        addImagesToSlides(imagesSlideBuilder, slideId, [images[0]]);
+        addImagesToSlides(imagesSlideBuilder, slideId, [images[im]]);
         const requests = imagesSlideBuilder.buildRequests();
         const imgRes = await slidesApi.updatePresentation(
           slidesOAuthToken,
@@ -190,7 +201,7 @@ export const parseSummary = async (
           requests,
         );
         if (!imgRes.error) {
-          imagesUsed.push(images[0]);
+          imagesUsed.push(images[im]);
           break;
         }
       }
