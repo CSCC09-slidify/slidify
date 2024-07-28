@@ -52,7 +52,7 @@ app.use(
     saveUninitialized: false,
     store: sessionStore,
     cookie: { secure: false, domain: "." + process.env.APP_DOMAIN },
-  })
+  }),
 );
 sessionStore.sync();
 

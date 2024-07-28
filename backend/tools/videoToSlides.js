@@ -180,15 +180,15 @@ export const parseSummary = async (
         searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
         query: s.sectionTitle,
       });
-      console.log("Fetched images")
-      console.log(images1)
+      console.log("Fetched images");
+      console.log(images1);
       const secondTry = await imagesApi.searchImages({
         apiKey: process.env.CUSTOM_SEARCH_API_KEY,
         searchEngineId: process.env.CUSTOM_SEARCH_ENGINE_ID,
         query: s.bullets[0],
       });
       const images = images1.concat(secondTry);
-      console.log(images)
+      console.log(images);
       for (let im = 0; im < images.length; im++) {
         if (!images[im].image) continue;
         if (imagesUsed.indexOf(images[im]) != -1) continue;
