@@ -1,0 +1,65 @@
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/etc/nginx/certs
+      - ./vhost:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - ./acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=amym.li@mail.utoronto.ca
+  frontend:
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/frontend-project-mac:deployment
+    container_name: frontend
+    restart: always
+    expose:
+      - 80
+    environment:
+      - VIRTUAL_HOST=slidify.live
+      - LETSENCRYPT_HOST=slidify.live
+    depends_on:
+      - backend
+  backend:
+    image: ghcr.io/utsc-cscc09-programming-on-the-web/backend-project-mac:deployment
+    container_name: backend
+    restart: always
+    expose:
+      - 3000
+    environment:
+      - VIRTUAL_HOST=api.slidify.live
+      - LETSENCRYPT_HOST=api.slidify.live
+      - DATABASE_URL=postgres://user:password@db:5432/db
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16
+    container_name: db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d db -U user"]
+      start_interval: 5s
+      start_period: 15s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:
