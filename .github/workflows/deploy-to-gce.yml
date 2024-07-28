@@ -1,0 +1,22 @@
+name: Deploy to GCE
+on:
+  workflow_run:
+    workflows: ["Publish Vue Skeleton to GHCR", "Publish Express Backend to GHCR"]
+    types:
+      - completed
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: ssh to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          echo "${{ secrets.CR_PAT }}" | docker login https://ghcr.io -u ${{ github.actor }} --password-stdin
+          docker compose pull && docker compose up -d
