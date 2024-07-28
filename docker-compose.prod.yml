@@ -10,6 +10,7 @@ services:
       - ./certs:/etc/nginx/certs
       - ./vhost:/etc/nginx/vhost.d
       - ./html:/usr/share/nginx/html
+      - ./nginx/custom.conf:/etc/nginx/conf.d/custom.conf:ro
   nginx-proxy-acme:
     image: nginxproxy/acme-companion
     container_name: nginx-proxy-acme
