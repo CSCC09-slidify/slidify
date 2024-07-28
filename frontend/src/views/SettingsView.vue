@@ -15,6 +15,7 @@
                 <v-col cols="6" class="w-100">
                     <div class="text-h6 mb-2">Heading Font Family</div>
                     <v-select
+                        @update:modelValue="changeInput"
                         v-model="headingFontFamily"
                         class="bg-transparent rounded-xl"
                         label=""
@@ -28,6 +29,7 @@
                     </v-select>
                     <div class="text-h6 mb-2">Body Font Family</div>
                     <v-select
+                        @update:modelValue="changeInput"
                         elevation="1"
                         class="bg-white elevation-0"
                         rounded="lg"
@@ -65,6 +67,7 @@
                             </v-text-field>
                         </template>
                         <v-color-picker
+                            @update:modelValue="changeInput"
                             v-model="headingFontColour"
                             :modes="['rgba']"
                         ></v-color-picker>
@@ -92,6 +95,7 @@
                             </v-text-field>
                         </template>
                         <v-color-picker
+                             @update:modelValue="changeInput"
                             v-model="bodyFontColour"
                             :modes="['rgba']"
                         ></v-color-picker>
@@ -123,6 +127,7 @@
                         <v-color-picker
                             v-model="backgroundColour"
                             :modes="['rgba']"
+                            @update:modelValue="changeInput"
                         ></v-color-picker>
                     </v-menu>
                     <div class="text-h6 mb-2">Image Positioning</div>
@@ -133,6 +138,7 @@
                         :items="[{ title: 'Default', value: 'default'}, { title: 'Background', value: 'full'}]"
                         variant="outlined"
                         rounded="lg"
+                        @update:modelValue="changeInput"
                     >
                         <template v-slot:item="{ props, item }">
                             <v-list-item class="bg-white" v-bind="props" :key="item"></v-list-item>
@@ -140,7 +146,7 @@
                     </v-select>
                 </v-col>
                 <v-col cols=12>
-                    <v-btn rounded="lg" :disabled="saving" class="w-100 text-capitalize" size="large" color="primary" @click="onSaveSlideSettings">
+                    <v-btn rounded="lg" :disabled="saving || !changed" class="w-100 text-capitalize" size="large" color="primary" @click="onSaveSlideSettings">
                         Save Changes
                         <template v-slot:append>
                             <v-progress-circular size="22" width="3" color="onPrimary" v-if="saving" indeterminate></v-progress-circular>
@@ -158,27 +164,25 @@ export default {
     watch: {
         headingFontColour: {
             handler(c) {
-                console.log(c)
                 if (!c) return;
                 this.headingFontColourString = `rgb(${c.r},${c.g},${c.b},${c.a})`;
             }
         },
         bodyFontColour: {
             handler(c) {
-                console.log(c)
                 if (!c) return;
                 this.bodyFontColourString = `rgb(${c.r},${c.g},${c.b},${c.a})`;
             }
         },
         backgroundColour: {
             handler(c) {
-                console.log(c)
                 if (!c) return;
                 this.backgroundColourString = `rgb(${c.r},${c.g},${c.b},${c.a})`;
             }
         }
     },
     data: () => ({
+        changed: false,
         headingFontColour: {
             r: 0,
             g: 0,
@@ -210,6 +214,9 @@ export default {
         availableFonts: availableFonts
     }),
     methods: {
+        changeInput() {
+            this.changed = true;
+        },
         onBackButtonClick() {
             this.$router.go(-1)
         },
@@ -225,6 +232,7 @@ export default {
             })
             .then(() => {
                 this.saving = false;
+                this.changed = false;
             })
         }
     },
