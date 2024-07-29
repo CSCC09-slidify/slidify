@@ -15,7 +15,7 @@ const router = createRouter({
       component: MainLayoutView,
       children: [
         {
-          path: "/upload",
+          path: "/create",
           name: "home",
           component: HomeView,
           meta: { requiresAuth: true },

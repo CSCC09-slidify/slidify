@@ -36,12 +36,13 @@ slidesRouter.post(
       }
     })
     // TODO: store jobs and generate IDs elsewhere
-    const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
+    const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 1000)}`;
     const job = await Job.create({
       jid: jobId,
       status: "running",
       startedAt: new Date(),
       UserUserId: userId,
+      title,
     });
     convertVideoToSlides(
       {
@@ -54,14 +55,14 @@ slidesRouter.post(
         callbackUrl: process.env.NODE_ENV == "production" || process.env.SPEECHMATICS_CALLBACK_URL ? 
         `${process.env.SPEECHMATICS_CALLBACK_URL}/${jobId}?title=${title}&accessToken=${req.session.accessToken}` : null
       },
-      (statusMessage) => {
-        req.io.emit(`slides/${jobId}/status`, statusMessage);
+      (statusMessage, presentationId) => {
+        req.io.emit(`slides/${jobId}/status`, {statusMessage, presentationId});
       },
       (presentationId) => {
         req.io.emit(`slides/${jobId}/presentationId`, presentationId);
       },
-      (slideId) => {
-        req.io.emit(`slides/${jobId}/slideReady`, slideId);
+      (slideId, presentationId) => {
+        req.io.emit(`slides/${jobId}/slideReady`, {slideId, presentationId});
       },
       (slideId, script) => {
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
@@ -120,6 +121,7 @@ slidesRouter.post(
       status: "running",
       startedAt: new Date(),
       UserUserId: userId,
+      title,
     });
     convertTextToSlides(
       {
@@ -128,14 +130,14 @@ slidesRouter.post(
         slidesOAuthToken: req.session.accessToken,
         config: userSettings.config,
       },
-      (statusMessage) => {
-        req.io.emit(`slides/${jobId}/status`, statusMessage);
+      (statusMessage, presentationId) => {
+        req.io.emit(`slides/${jobId}/status`, {statusMessage, presentationId});
       },
       (presentationId) => {
         req.io.emit(`slides/${jobId}/presentationId`, presentationId);
       },
-      (slideId) => {
-        req.io.emit(`slides/${jobId}/slideReady`, slideId);
+      (slideId, presentationId) => {
+        req.io.emit(`slides/${jobId}/slideReady`, {slideId, presentationId});
       },
       (slideId, script) => {
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
@@ -324,13 +326,13 @@ slidesRouter.get(
 
 slidesRouter.get("/jobs/active", validateUserCredentials, async (req, res) => {
   const userId = req.session.userId;
-  const activeJobs = await Job.findAll({
+  const activeJobs = await Job.findAndCountAll({
     where: {
       UserUserId: userId,
       status: "running",
     },
   });
-  return res.json({ jobs: activeJobs });
+  return res.json({ jobs: activeJobs.rows, total: activeJobs.count });
 });
 
 // For debugging

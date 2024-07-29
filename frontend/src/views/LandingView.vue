@@ -36,7 +36,7 @@ export default {
   methods: {
     login() {
       googleLogin(() => {
-        this.$router.push("/upload");
+        this.$router.push("/create");
       });
     },
   },
