@@ -82,6 +82,7 @@ export default {
             };
           }
           console.log(this.presentation.slideScripts);
+          this.loadingMessage = "";
         });
 
         websocket.on(`slides/${job.id}/status`, (status) => {
