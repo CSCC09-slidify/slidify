@@ -44,7 +44,7 @@ import apiService from "@/services/api.service";
 import { websocket } from "@/services/socket.service";
 
 export default {
-  name: "CreateView",
+  name: "HomeView",
   components: {
     VideoUpload,
     TextUpload,
