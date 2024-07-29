@@ -35,7 +35,6 @@
         :icon="notification.active ? 'mdi-bell-badge' : 'mdi-bell'"></v-btn>
       <NotificationList activator="#notification-activator" :content="notification.content"
         :isOpened="notification.isOpen" :clearNotifications="clearNotifications" :onClose="closeNotifications" />
-      <v-btn icon="mdi-dots-vertical"></v-btn>
     </v-app-bar>
     <v-main>
       <router-view :key="forceReload" @job-started="onJobStarted"></router-view>
