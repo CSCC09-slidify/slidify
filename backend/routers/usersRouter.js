@@ -67,13 +67,6 @@ usersRouter.post("/signin", async (req, res) => {
 });
 
 usersRouter.post("/signout", async (req, res) => {
-  // TODO: remove / this is a debug feature
-  await Job.destroy({
-    where: {
-      UserUserId: req.session.userId,
-      status: "running"
-    }
-  });
   // TODO: revoke tokens ?
   req.session.destroy((err) => {
     if (err) {
