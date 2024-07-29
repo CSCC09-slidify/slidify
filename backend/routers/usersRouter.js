@@ -111,7 +111,7 @@ usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
     });
 });
 
-usersRouter.post("/test/:jobId", async (req, res) => {
+usersRouter.post("/test", async (req, res) => {
   console.log("TEST ENDPOINT HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
   console.log(req.params)
   console.log(req.body)
