@@ -115,5 +115,9 @@ usersRouter.post("/test/:jobId", async (req, res) => {
   console.log("TEST ENDPOINT HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
   console.log(req.params)
   console.log(req.body)
+  const headers = req.headers;
+  console.log(headers)
+  const authHeaders = req.headers.authorization;
+  console.log(authHeaders)
   return res.json({message: "received"});
 })
