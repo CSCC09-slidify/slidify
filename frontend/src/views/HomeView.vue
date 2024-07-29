@@ -1,10 +1,13 @@
 <template>
   <v-container>
-    <p>Convert from:</p>
-    <v-radio-group inline v-model="inputType" hide-details="auto">
-      <v-radio label="Video or Audio" value="video"></v-radio>
-      <v-radio label="Text" value="text"></v-radio>
-    </v-radio-group>
+    <v-row class="pt-2">
+      <div class="pt-2">Convert from</div>
+      <v-radio-group inline v-model="inputType" hide-details="auto">
+        <v-radio label="Video or Audio" value="video"></v-radio>
+        <v-radio label="Text" value="text"></v-radio>
+      </v-radio-group>
+      <v-btn variant="text" to="/settings" rounded="xl">Adjust Slide settings</v-btn>
+    </v-row>
     <VideoUpload v-if="inputType == 'video'" :on-submit="submitVideo" />
     <TextUpload v-if="inputType == 'text'" :on-submit="submitText" />
     <ErrorMessage v-if="error.hasError" :message="error.message" />

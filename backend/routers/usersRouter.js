@@ -3,6 +3,8 @@ import { User } from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
 import { validateUserCredentials } from "../middleware/auth.js";
 import oauthApi from "../tools/oauth/api.js";
+import { UserSettings } from "../models/userSettings.js";
+import { defaultUserSettings } from "../constants/userSettings.js";
 
 export const usersRouter = Router();
 
@@ -37,6 +39,10 @@ usersRouter.post("/signin", async (req, res) => {
         userId: userId,
         name: payload["name"],
       });
+      await UserSettings.create({
+        config: defaultUserSettings,
+        UserUserId: userId
+      })
     }
 
     client.setCredentials({ access_token: tokens.access_token });
@@ -110,6 +116,49 @@ usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
       res.json({ profile });
     });
 });
+
+
+usersRouter.get("/settings", validateUserCredentials, async (req, res) => {
+  const { userId } = req.session;
+  const userSettings = await UserSettings.findOne({
+    where: {
+      UserUserId: userId
+    }
+  });
+  console.log("Got user settings: ")
+  console.log(userSettings)
+  if (userSettings) {
+    console.log("Config is")
+    console.log(userSettings.config)
+    if (!userSettings.config || userSettings.config == {} || !userSettings.config.headingFontFamily) {
+      console.log("Setting new config: ")
+      console.log(defaultUserSettings);
+      userSettings.config = defaultUserSettings;
+      await userSettings.save();
+    }
+    return res.json(userSettings.config)
+  } else {
+    const newSettings = await UserSettings.create({
+      config: defaultUserSettings,
+      UserUserId: userId
+    })
+    return res.json(defaultUserSettings)
+  }
+});
+
+usersRouter.patch("/settings", validateUserCredentials, async (req, res) => {
+  const { userId } = req.session;
+  const newSettings = req.body;
+  await UserSettings.update(
+    {config: newSettings},
+    {
+      where: {
+        UserUserId: userId
+      }
+    }
+  )
+  return res.json(newSettings)
+})
 
 usersRouter.post("/test/:jobId", async (req, res) => {
   console.log("TEST ENDPOINT HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
