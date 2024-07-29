@@ -70,41 +70,49 @@ slidesRouter.post(
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
       },
       async (r) => {
-        const user = await User.findOne({
-          where: {
-            userId: req.session.userId
+        try {
+          const user = await User.findOne({
+            where: {
+              userId: req.session.userId
+            }
+          })
+          if (!user) {
+            return;
           }
-        })
-        if (!user) {
-          return;
-        }
-        if (!r.error) {
-          const { presentationId } = r;
-          await Presentation.create({
-            presentationId: jobId,
-            externalId: presentationId,
-            title,
-            UserUserId: req.session.userId,
-            SlidifyPresentationJobJid: jobId,
-          });
-          job.status = "done";
-          const notification = await Notification.create({
-            notificationId: `${userId}#${Date.now().toString()}${Math.floor(Math.random() * 10000)}`,
-            actorId: userId,
-            type: "presentation",
-            content: {
-              title: `Presentation "${title}" has been created.`,
+          if (!r.error) {
+            const { presentationId } = r;
+            await Presentation.create({
               presentationId: jobId,
-            },
-            status: 1,
-          });
-          sendNotification(userId, req.io, notification);
-        } else {
+              externalId: presentationId,
+              title,
+              UserUserId: req.session.userId,
+              SlidifyPresentationJobJid: jobId,
+            });
+            job.status = "done";
+            const notification = await Notification.create({
+              notificationId: `${userId}#${Date.now().toString()}${Math.floor(Math.random() * 10000)}`,
+              actorId: userId,
+              type: "presentation",
+              content: {
+                title: `Presentation "${title}" has been created.`,
+                presentationId: jobId,
+              },
+              status: 1,
+            });
+            sendNotification(userId, req.io, notification);
+          } else {
+            job.status = "error";
+          }
+          job.finishedAt = new Date();
+          await job.save();
+          req.io.emit(`slides/${jobId}/done`, r);
+        } catch (e) {
           job.status = "error";
+          await job.save();
+          req.io.emit(`slides/${jobId}/done`, {
+            error: "There was a problem creating the presentation"
+          });
         }
-        job.finishedAt = new Date();
-        await job.save();
-        req.io.emit(`slides/${jobId}/done`, r);
       },
     );
     return res.json({ msg: "Job started", id: jobId });
@@ -153,42 +161,50 @@ slidesRouter.post(
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
       },
       async (r) => {
-        const user = await User.findOne({
-          where: {
-            userId: req.session.userId
+        try {
+          const user = await User.findOne({
+            where: {
+              userId: req.session.userId
+            }
+          })
+          if (!user) {
+            return;
           }
-        })
-        if (!user) {
-          return;
-        }
-        if (!r.error) {
-          const { presentationId } = r;
-          await Presentation.create({
-            presentationId: jobId,
-            externalId: presentationId,
-            UserUserId: req.session.userId,
-            SlidifyPresentationJobJid: jobId,
-            title,
-          });
-          job.status = "done";
-          const notification = await Notification.create({
-            notificationId: `${userId}#${Date.now().toString()}${Math.floor(Math.random() * 10000)}`,
-            actorId: userId,
-            type: "presentation",
-            content: {
-              title: `Presentation "${title}" has been created.`,
+          if (!r.error) {
+            const { presentationId } = r;
+            await Presentation.create({
               presentationId: jobId,
-            },
-            status: 1,
-          });
-          sendNotification(userId, req.io, notification);
+              externalId: presentationId,
+              UserUserId: req.session.userId,
+              SlidifyPresentationJobJid: jobId,
+              title,
+            });
+            job.status = "done";
+            const notification = await Notification.create({
+              notificationId: `${userId}#${Date.now().toString()}${Math.floor(Math.random() * 10000)}`,
+              actorId: userId,
+              type: "presentation",
+              content: {
+                title: `Presentation "${title}" has been created.`,
+                presentationId: jobId,
+              },
+              status: 1,
+            });
+            sendNotification(userId, req.io, notification);
+            job.finishedAt = new Date();
+          } else {
+            job.status = "error";
+          }
           job.finishedAt = new Date();
-        } else {
+          await job.save();
+          req.io.emit(`slides/${jobId}/done`, r);
+        } catch (e) {
           job.status = "error";
+          await job.save();
+          req.io.emit(`slides/${jobId}/done`, {
+            error: "There was a problem creating the presentation"
+          });
         }
-        job.finishedAt = new Date();
-        await job.save();
-        req.io.emit(`slides/${jobId}/done`, r);
       },
     );
     return res.json({ msg: "Job started", id: jobId });
@@ -220,8 +236,8 @@ slidesRouter.post("/callback/:jobId", async (req, res) => {
         config: userSettings.config ?? defaultUserSettings,
         speechmaticsJobId: id
       },
-      (statusMessage) => {
-        req.io.emit(`slides/${jobId}/status`, statusMessage);
+      (statusMessage, presentationId) => {
+        req.io.emit(`slides/${jobId}/status`, { statusMessage, presentationId });
       },
       (presentationId) => {
         req.io.emit(`slides/${jobId}/presentationId`, presentationId);
@@ -233,33 +249,41 @@ slidesRouter.post("/callback/:jobId", async (req, res) => {
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
       },
       async (r) => {
-        if (!r.error) {
-          const { presentationId } = r;
-          await Presentation.create({
-            presentationId: jobId,
-            externalId: presentationId,
-            title,
-            UserUserId: userId,
-            SlidifyPresentationJobJid: jobId,
-          });
-          job.status = "done";
-          const notification = await Notification.create({
-            notificationId: `${userId}#${Date.now().toString()}${Math.floor(Math.random() * 10000)}`,
-            actorId: userId,
-            type: "presentation",
-            content: {
-              title: `Presentation "${title}" has been created.`,
+        try {
+          if (!r.error) {
+            const { presentationId } = r;
+            await Presentation.create({
               presentationId: jobId,
-            },
-            status: 1,
-          });
-          sendNotification(userId, req.io, notification);
-        } else {
+              externalId: presentationId,
+              title,
+              UserUserId: userId,
+              SlidifyPresentationJobJid: jobId,
+            });
+            job.status = "done";
+            const notification = await Notification.create({
+              notificationId: `${userId}#${Date.now().toString()}${Math.floor(Math.random() * 10000)}`,
+              actorId: userId,
+              type: "presentation",
+              content: {
+                title: `Presentation "${title}" has been created.`,
+                presentationId: jobId,
+              },
+              status: 1,
+            });
+            sendNotification(userId, req.io, notification);
+          } else {
+            job.status = "error";
+          }
+          job.finishedAt = new Date();
+          await job.save();
+          req.io.emit(`slides/${jobId}/done`, r);
+        } catch (e) {
           job.status = "error";
+          await job.save();
+          req.io.emit(`slides/${jobId}/done`, {
+            error: "There was a problem creating the presentation"
+          });
         }
-        job.finishedAt = new Date();
-        await job.save();
-        req.io.emit(`slides/${jobId}/done`, r);
       },
     )
   }
