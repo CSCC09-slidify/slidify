@@ -156,6 +156,7 @@ slidesRouter.post(
             status: 1,
           });
           sendNotification(userId, req.io, notification);
+          job.finishedAt = new Date();
         } else {
           job.status = "error";
         }
