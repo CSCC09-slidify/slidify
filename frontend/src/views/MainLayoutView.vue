@@ -183,14 +183,17 @@ export default {
       apiService.whoami().then((res) => {
         if (this.isAuthenticated && res.userId) {
           websocket.on(`notification/${res.userId}/new`, (r) => {
-            this.notification.content.splice(0, 0, {
-              text: r.content.title,
-              date: r.date,
-              link:
-                r.type == "presentation"
-                  ? `/presentations/${r.content.presentationId}`
-                  : "",
-            });
+            if (!notification.find(n => n.link == `/presentations/${r.content.presentationId}`)) {
+              this.notification.content.splice(0, 0, {
+                text: r.content.title,
+                date: r.date,
+                link:
+                  r.type == "presentation"
+                    ? `/presentations/${r.content.presentationId}`
+                    : "",
+              });
+              this.notification.active = true;
+            }
             this.notification.active = true;
             if (r.type == "presentation") {
               this.waitingForPresentation = false;
