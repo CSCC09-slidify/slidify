@@ -17,6 +17,7 @@ import slidesApi from "../tools/slides/api.js";
 import { sendNotification } from "../tools/notifications.js";
 import { UserSettings } from "../models/userSettings.js";
 import { defaultUserSettings } from "../constants/userSettings.js";
+import crypto from "crypto";
 
 const upload = multer();
 
@@ -37,7 +38,7 @@ slidesRouter.post(
       }
     })
     // TODO: store jobs and generate IDs elsewhere
-    const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 1000)}`;
+    const jobId = crypto.randomUUID();
     const job = await Job.create({
       jid: jobId,
       status: "running",
@@ -124,7 +125,7 @@ slidesRouter.post(
       }
     })
     // TODO: store jobs and generate IDs elsewhere
-    const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
+    const jobId = crypto.randomUUID();
     const job = await Job.create({
       jid: jobId,
       status: "running",
