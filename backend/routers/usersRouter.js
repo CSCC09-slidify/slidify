@@ -86,7 +86,7 @@ usersRouter.get("/whoami", async (req, res) => {
   const user = await User.findByPk(req.session.userId);
   if (!user) {
     return res.status(401).json({
-      error: "User not authenticated",
+      error: "User not authenticated: invalid session",
     });
   } else if (req.session.expiry < Date.now()) {
     return res.status(401).json({
@@ -116,6 +116,7 @@ usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
       res.json({ profile });
     });
 });
+
 
 usersRouter.get("/settings", validateUserCredentials, async (req, res) => {
   const { userId } = req.session;
@@ -157,4 +158,15 @@ usersRouter.patch("/settings", validateUserCredentials, async (req, res) => {
     }
   )
   return res.json(newSettings)
+})
+
+usersRouter.post("/test/:jobId", async (req, res) => {
+  console.log("TEST ENDPOINT HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+  console.log(req.params)
+  console.log(req.body)
+  const headers = req.headers;
+  console.log(headers)
+  const authHeaders = req.headers.authorization;
+  console.log(authHeaders)
+  return res.json({message: "received"});
 })
