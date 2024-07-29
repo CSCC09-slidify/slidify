@@ -115,5 +115,5 @@ usersRouter.post("/test", async (req, res) => {
   console.log("TEST ENDPOINT HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
   console.log(req.params)
   console.log(req.body)
-  return res.status(204);
+  return res.json({message: "received"});
 })
