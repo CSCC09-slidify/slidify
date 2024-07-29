@@ -16,7 +16,7 @@ import OpenAI from "openai";
 
 // returns { presentationId, numSlides }
 export const convertVideoToSlides = async (
-  { filePath, fileName, file, title, slidesOAuthToken, config },
+  { fileBuffer, fileName, file, title, slidesOAuthToken, config, callbackUrl },
   updateStatus,
   presentationIdReady,
   slideReady,
@@ -68,11 +68,13 @@ export const convertVideoToSlides = async (
   if (isValid && speechmaticsToken) {
     updateStatus("Starting Video Processing");
     const jobData = !file
-      ? await videoApi.sendVideoFromPath(fileName, filePath, speechmaticsToken)
-      : await videoApi.sendVideoFromFile(file, speechmaticsToken);
+      ? await videoApi.sendVideoFromBuffer(fileName, fileBuffer, speechmaticsToken, callbackUrl)
+      : await videoApi.sendVideoFromFile(file, speechmaticsToken, callbackUrl);
     if (jobData.id) {
       console.log("Speechmatics job id is " + jobData.id);
-      checkJobStatus(jobData.id, speechmaticsToken, parseSummary);
+      if (!callbackUrl) {
+        checkJobStatus(jobData.id, speechmaticsToken, parseSummary);
+      }
     } else {
       next({ error: jobData.error });
     }
@@ -80,6 +82,37 @@ export const convertVideoToSlides = async (
     next({ error: "Invalid token" });
   }
 };
+
+export const continueVideoToSlidesAfterCallback = async (
+  { title, slidesOAuthToken, config, speechmaticsJobId },
+  updateStatus,
+  presentationIdReady,
+  slideReady,
+  scriptReady,
+  next,
+) => {
+  updateStatus("Checking Google Slides Credentials");
+  const isValid = await oauthApi.validateToken({ authToken: slidesOAuthToken });
+  const speechmaticsToken = process.env.SPEECHMATICS_API_KEY;
+  if (isValid && speechmaticsToken) {
+    updateStatus("Finished Video Processing");
+    videoApi.getVideoSummary(speechmaticsJobId, speechmaticsToken).then((results) => {
+      parseSummary(
+        convertSpeechmaticsSummary(results),
+        config,
+        slidesOAuthToken,
+        title,
+        updateStatus,
+        presentationIdReady,
+        slideReady,
+        scriptReady,
+        next,
+      );
+    });
+  } else {
+    next({ error: "Invalid token" });
+  }
+}
 
 export const convertTextToSlides = async (
   { text, title, slidesOAuthToken, config },
