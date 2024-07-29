@@ -134,6 +134,10 @@ export default {
       apiService.whoami().then((response) => {
         this.isAuthenticated = Boolean(response.userId);
         next();
+      })
+      .catch(() => {
+        this.isAuthenticated = false;
+        next();
       });
     },
     fetchSlidesHistory() {

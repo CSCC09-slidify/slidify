@@ -167,6 +167,7 @@ export default {
       // TODO: input token
       this.isLoading = true;
       this.error.hasError = false;
+      this.loadingMessage = "";
       (this.presentation = {
         presentation: null,
         presentationTitle: "",
@@ -193,6 +194,7 @@ export default {
         };
         return;
       }
+      this.loadingMessage = "";
       this.isLoading = true;
       this.error.hasError = false;
       (this.presentation = {
