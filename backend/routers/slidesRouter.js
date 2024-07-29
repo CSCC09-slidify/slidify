@@ -81,6 +81,7 @@ slidesRouter.post(
           }
           if (!r.error) {
             const { presentationId } = r;
+            console.log("creating presentation", jobId, presentationId);
             await Presentation.create({
               presentationId: jobId,
               externalId: presentationId,
