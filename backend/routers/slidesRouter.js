@@ -184,6 +184,8 @@ slidesRouter.post("/callback/:jobId", async (req, res) => {
       jid: jobId
     }
   })
+  req.io.emit(`slides/${jobId}/status`, "Received callback");
+
   if (!job) return res.json({message: "Job does not exist"})
   const userId = job.UserUserId;
   const userSettings = await UserSettings.findOne({
