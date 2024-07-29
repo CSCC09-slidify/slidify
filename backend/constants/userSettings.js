@@ -1,6 +1,6 @@
 export const defaultUserSettings = {
-    headingFontFamily: "Monsterrat",
-    bodyFontFamily: "Monsterrat",
+    headingFontFamily: "Arial",
+    bodyFontFamily: "Arial",
     headingFontColour: {
         r: 0,
         g: 0,

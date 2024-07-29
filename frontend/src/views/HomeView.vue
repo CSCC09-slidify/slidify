@@ -30,7 +30,7 @@
       :slide-scripts="presentation.slideScripts" class="w-100 fill-height" />
     <div v-else-if="isLoading" class="align-center justify-center pa-4">
       <div :cols="12" :md="presentation.externalId ? 4 : 12" :lg="presentation.externalId ? 4 : 12">
-        <LoadingSpinner :loading-message="loadingMessage" />
+        <LoadingSpinner :loading-message="presentation.status" />
       </div>
     </div>
   </div>
