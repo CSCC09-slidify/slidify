@@ -110,3 +110,10 @@ usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
       res.json({ profile });
     });
 });
+
+usersRouter("/test", async (req, res) => {
+  console.log("TEST ENDPOINT HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+  console.log(req.params)
+  console.log(req.body)
+  return res.status(204);
+})

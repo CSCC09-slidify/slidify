@@ -34,7 +34,8 @@ try {
 
 app.set("trust proxy", 1);
 const corsOptions = {
-  origin: [process.env.CORS_ORIGIN, "https://slidify.live", , "https://slidifylabs.live"],
+  origin: [process.env.CORS_ORIGIN, "https://slidify.live", , "https://slidifylabs.live", 
+    "52.146.58.224", "52.146.58.159", "52.146.59.242", "52.146.59.213", "52.146.58.64"],
   credentials: true,
 };
 app.use(cors(corsOptions));
