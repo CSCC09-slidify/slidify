@@ -1,13 +1,15 @@
 <template>
   <ErrorMessage v-if="error.hasError" :message="error.message" />
-  <div v-else-if="!presentation.presentationId" class="px-12 py-8 h-100 d-flex flex-column align-stretch">
+  <div v-if="!presentation.presentationId" class="px-12 py-8 h-100 d-flex flex-column align-stretch">
     <div class="slides-form w-100">
-      <v-radio-group v-model="inputType" hide-details="auto">
+      <v-radio-group class="d-flex" v-model="inputType" inline hide-details="auto">
         <template v-slot:label>
           <div>Convert from:</div>
         </template>
         <v-radio label="Video or Audio (max 100 MB)" value="video"></v-radio>
         <v-radio label="Text (max 1000 words)" value="text"></v-radio>
+        <v-spacer></v-spacer>
+        <v-btn class="ma-2" variant="text" to="/settings" rounded="xl">Adjust Slide settings</v-btn>
       </v-radio-group>
       <VideoUpload v-if="inputType == 'video'" :on-submit="submitVideo" />
       <TextUpload v-if="inputType == 'text'" :on-submit="submitText" />

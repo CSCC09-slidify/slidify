@@ -2,7 +2,7 @@ import * as fs from "fs";
 
 const module = {};
 
-const config = (type) =>
+const config = (type, callback) =>
   JSON.stringify({
     type: "transcription",
     transcription_config: {
@@ -15,10 +15,16 @@ const config = (type) =>
       summary_length: "detailed",
       summary_type: "bullets",
     },
+    "notification_config": callback ? [
+      {
+        "url": callback,
+        "contents": ["transcript"],
+      }
+    ] : []
   });
 
-const sendVideoRequest = (authToken, form) => {
-  form.append("config", config("enhanced"));
+const sendVideoRequest = (authToken, form, callbackUrl) => {
+  form.append("config", config("enhanced", callbackUrl));
   return fetch("https://asr.api.speechmatics.com/v2/jobs/", {
     method: "POST",
     headers: {
@@ -31,7 +37,7 @@ const sendVideoRequest = (authToken, form) => {
       console.log(data);
       if (data.error) {
         form.delete("config");
-        form.append("config", config("standard"));
+        form.append("config", config("standard", callbackUrl));
         return fetch("https://asr.api.speechmatics.com/v2/jobs/", {
           method: "POST",
           headers: {
@@ -45,19 +51,18 @@ const sendVideoRequest = (authToken, form) => {
     });
 };
 
-module.sendVideoFromPath = (fileName, path, authToken) => {
+module.sendVideoFromBuffer = (fileName, buffer, authToken, callbackUrl) => {
   const form = new FormData();
-  const file = fs.readFileSync(path);
-  const blob = new Blob([file]);
+  //const file = fs.readFile(path);
+  const blob = new Blob([buffer]);
   form.append("data_file", blob, fileName);
-  return sendVideoRequest(authToken, form);
+  return sendVideoRequest(authToken, form, callbackUrl);
 };
 
-module.sendVideoFromFile = (file, authToken) => {
+module.sendVideoFromFile = (file, authToken, callbackUrl, callbackHeaders) => {
   const form = new FormData();
   form.append("data_file", file);
-  form.append("config", JSON.stringify(config("enhanced")));
-  return sendVideoRequest(authToken, form);
+  return sendVideoRequest(authToken, form, callbackUrl, callbackHeaders);
 };
 
 module.checkVideoStatus = (id, authToken) => {

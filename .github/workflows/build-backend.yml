@@ -32,6 +32,7 @@ jobs:
           envkey_GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           envkey_GOOGLE_REDIRECT_URI: ${{ secrets.B_GOOGLE_REDIRECT_URI }}
           envkey_SPEECHMATICS_API_KEY: ${{ secrets.B_SPEECHMATICS_API_KEY }}
+          envkey_SPEECHMATICS_CALLBACK_URL: ${{ secrets.B_SPEECHMATICS_CALLBACK_URL }}
           envkey_CUSTOM_SEARCH_API_KEY: ${{ secrets.B_CUSTOM_SEARCH_API_KEY }}
           envkey_CUSTOM_SEARCH_ENGINE_ID: ${{ secrets.B_CUSTOM_SEARCH_ENGINE_ID }}
           envkey_DATABASE_URL: ${{ secrets.B_DATABASE_URL }}

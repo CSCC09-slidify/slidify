@@ -3,6 +3,9 @@ import { User } from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
 import { validateUserCredentials } from "../middleware/auth.js";
 import oauthApi from "../tools/oauth/api.js";
+import { UserSettings } from "../models/userSettings.js";
+import { defaultUserSettings } from "../constants/userSettings.js";
+import { Job } from "../models/job.js";
 
 export const usersRouter = Router();
 
@@ -37,6 +40,10 @@ usersRouter.post("/signin", async (req, res) => {
         userId: userId,
         name: payload["name"],
       });
+      await UserSettings.create({
+        config: defaultUserSettings,
+        UserUserId: userId
+      })
     }
 
     client.setCredentials({ access_token: tokens.access_token });
@@ -58,6 +65,13 @@ usersRouter.post("/signin", async (req, res) => {
 });
 
 usersRouter.post("/signout", async (req, res) => {
+  // TODO: remove / this is a debug feature
+  await Job.destroy({
+    where: {
+      UserUserId: req.session.userId,
+      status: "running"
+    }
+  });
   // TODO: revoke tokens ?
   req.session.destroy((err) => {
     if (err) {
@@ -66,7 +80,7 @@ usersRouter.post("/signout", async (req, res) => {
     }
     res.clearCookie("connect.sid");
     return res.json({ message: "Signed out successfully" });
-  });
+  });  
 });
 
 usersRouter.get("/whoami", async (req, res) => {
@@ -80,7 +94,7 @@ usersRouter.get("/whoami", async (req, res) => {
   const user = await User.findByPk(req.session.userId);
   if (!user) {
     return res.status(401).json({
-      error: "User not authenticated",
+      error: "User not authenticated: invalid session",
     });
   } else if (req.session.expiry < Date.now()) {
     return res.status(401).json({
@@ -110,3 +124,57 @@ usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
       res.json({ profile });
     });
 });
+
+
+usersRouter.get("/settings", validateUserCredentials, async (req, res) => {
+  const { userId } = req.session;
+  const userSettings = await UserSettings.findOne({
+    where: {
+      UserUserId: userId
+    }
+  });
+  console.log("Got user settings: ")
+  console.log(userSettings)
+  if (userSettings) {
+    console.log("Config is")
+    console.log(userSettings.config)
+    if (!userSettings.config || userSettings.config == {} || !userSettings.config.headingFontFamily) {
+      console.log("Setting new config: ")
+      console.log(defaultUserSettings);
+      userSettings.config = defaultUserSettings;
+      await userSettings.save();
+    }
+    return res.json(userSettings.config)
+  } else {
+    const newSettings = await UserSettings.create({
+      config: defaultUserSettings,
+      UserUserId: userId
+    })
+    return res.json(defaultUserSettings)
+  }
+});
+
+usersRouter.patch("/settings", validateUserCredentials, async (req, res) => {
+  const { userId } = req.session;
+  const newSettings = req.body;
+  await UserSettings.update(
+    {config: newSettings},
+    {
+      where: {
+        UserUserId: userId
+      }
+    }
+  )
+  return res.json(newSettings)
+})
+
+usersRouter.post("/test/:jobId", async (req, res) => {
+  console.log("TEST ENDPOINT HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+  console.log(req.params)
+  console.log(req.body)
+  const headers = req.headers;
+  console.log(headers)
+  const authHeaders = req.headers.authorization;
+  console.log(authHeaders)
+  return res.json({message: "received"});
+})

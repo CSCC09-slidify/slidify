@@ -3,6 +3,8 @@ import HomeView from "../views/HomeView.vue";
 import PresentationView from "../views/PresentationView.vue";
 import MainLayoutView from "../views/MainLayoutView.vue";
 import LandingView from "../views/LandingView.vue";
+import SettingsView from "../views/SettingsView.vue";
+
 // import apiService from "@/services/api.service";
 
 const router = createRouter({
@@ -28,6 +30,11 @@ const router = createRouter({
           path: "/",
           name: "landing",
           component: LandingView,
+        },
+        {
+          path: "/settings",
+          name: "settings",
+          component: SettingsView,
         },
       ],
     },
