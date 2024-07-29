@@ -109,6 +109,7 @@ slidesRouter.post(
           req.io.emit(`slides/${jobId}/done`, r);
         } catch (e) {
           job.status = "error";
+          job.finishedAt = new Date();
           await job.save();
           req.io.emit(`slides/${jobId}/done`, {
             error: "There was a problem creating the presentation"
@@ -201,6 +202,7 @@ slidesRouter.post(
           req.io.emit(`slides/${jobId}/done`, r);
         } catch (e) {
           job.status = "error";
+          job.finishedAt = new Date();
           await job.save();
           req.io.emit(`slides/${jobId}/done`, {
             error: "There was a problem creating the presentation"
@@ -280,6 +282,7 @@ slidesRouter.post("/callback/:jobId", async (req, res) => {
           req.io.emit(`slides/${jobId}/done`, r);
         } catch (e) {
           job.status = "error";
+          job.finishedAt = new Date();
           await job.save();
           req.io.emit(`slides/${jobId}/done`, {
             error: "There was a problem creating the presentation"
