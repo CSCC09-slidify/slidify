@@ -262,6 +262,7 @@ slidesRouter.post("/callback/:jobId", async (req, res) => {
       },
     )
   }
+  res.json({ message: "Received callback" })
 })
 
 slidesRouter.get("/", validateUserCredentials, async (req, res) => {
