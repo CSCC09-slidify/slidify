@@ -182,10 +182,10 @@ export default {
     },
     submitText(text, title) {
       console.log("text uploaded", title);
-      if (text.split(" ").length < 200) {
+      if (text.split(" ").length < 50) {
         this.error = {
           hasError: true,
-          message: "Text must be at least 200 words long",
+          message: "Text must be at least 50 words long",
         };
         return;
       } else if (text.split(" ").length > 1000) {
