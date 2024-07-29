@@ -10,6 +10,7 @@ import {
   validateUserCredentials,
   validateNoActiveJobs,
 } from "../middleware/auth.js";
+import { User } from "../models/user.js";
 import { Job } from "../models/job.js";
 import { Notification } from "../models/notification.js";
 import slidesApi from "../tools/slides/api.js";
@@ -67,6 +68,14 @@ slidesRouter.post(
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
       },
       async (r) => {
+        const user = await User.findOne({
+          where: {
+            userId: req.session.userId
+          }
+        })
+        if (!user) {
+          return;
+        }
         if (!r.error) {
           const { presentationId } = r;
           await Presentation.create({
@@ -141,6 +150,14 @@ slidesRouter.post(
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
       },
       async (r) => {
+        const user = await User.findOne({
+          where: {
+            userId: req.session.userId
+          }
+        })
+        if (!user) {
+          return;
+        }
         if (!r.error) {
           const { presentationId } = r;
           await Presentation.create({

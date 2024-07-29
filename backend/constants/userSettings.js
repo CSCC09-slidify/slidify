@@ -13,7 +13,7 @@ export const defaultUserSettings = {
         b: 0,
         a: 1
     },
-    positioning: "",
+    positioning: "default",
     backgroundColour: {
         r: 255,
         g: 255,
