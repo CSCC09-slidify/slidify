@@ -80,11 +80,7 @@ export default {
         this.presentation.presentationTitle = job.title;
         this.presentation.jobStarted = job.startedAt;
         this.presentation.jobFinished = job.finishedAt;
-        if (job.status === "running") {
-          this.presentation.status = "Processing inputs...";
-        } else if (job.status === "done") {
-          this.presentation.status = "Finished processing inputs...";
-        }
+        this.presentation.status = "Loading...";
         this.presentation.timeElapsed = this.getTimeElapsed(job.startedAt, job.finishedAt);
         const updateTimeElapsed = setInterval(() => {
           if (this.presentation.status === "Completed" || this.presentation.finishedAt) {
@@ -133,8 +129,11 @@ export default {
           websocket.off(`slides/${jid}/presentationId`);
         }
       });
-      websocket.on(`slides/${jid}/status`, (status) => {
-        this.presentation.status = status;
+      websocket.on(`slides/${jid}/status`, (res) => {
+        this.presentation.status = res.statusMessage;
+        if (!this.presentation.externalId && res.presentationId) {
+          this.presentation.externalId = res.presentationId;
+        }
       });
       websocket.on(`slides/${jid}/presentationId`, (presentationId) => {
         this.presentation.externalId = presentationId;

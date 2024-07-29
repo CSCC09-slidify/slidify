@@ -151,7 +151,7 @@ export const parseSummary = async (
   try {
     presentationIdReady(presentationId);
     console.log("Presentation id is " + presentationId);
-    updateStatus("Building Slides");
+    updateStatus("Building Slides", presentationId);
     const slideBuilder = SlideBuilder();
     convertTitleToSlides(slideBuilder, title);
     await slidesApi.updatePresentation(
@@ -159,11 +159,11 @@ export const parseSummary = async (
       presentationId,
       slideBuilder.buildRequests(),
     );
-    slideReady("p");
+    slideReady("p", presentationId);
     const imagesUsed = [];
     const slideIds = ["p"];
     for (let i = 0; i < summary.length; i++) {
-      updateStatus("Building Slide #" + (i + 1));
+      updateStatus("Building Slide #" + (i + 1), presentationId);
       const s = summary[i];
       const summarySlideBuilder = SlideBuilder();
       const slideId = `slide${i}`;
@@ -228,7 +228,7 @@ export const parseSummary = async (
       } catch (e) {
         console.log(e);
       }
-      slideReady(slideId);
+      slideReady(slideId, presentationId);
       slideIds.push(slideId);
       console.log("Done speaker notes request " + i);
     }
@@ -244,8 +244,8 @@ export const parseSummary = async (
       imageReferencesBuilder.buildRequests(),
     );
     slideIds.push("imageReferencesSlide");
-    slideReady("imageReferencesSlide");
-    updateStatus("Completed");
+    slideReady("imageReferencesSlide", presentationId);
+    updateStatus("Completed", presentationId);
     next({
       presentationId,
       numSlides: summary.length + 1,

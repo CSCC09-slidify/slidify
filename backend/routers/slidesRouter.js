@@ -43,14 +43,14 @@ slidesRouter.post(
         title,
         slidesOAuthToken: req.session.accessToken,
       },
-      (statusMessage) => {
-        req.io.emit(`slides/${jobId}/status`, statusMessage);
+      (statusMessage, presentationId) => {
+        req.io.emit(`slides/${jobId}/status`, {statusMessage, presentationId});
       },
       (presentationId) => {
         req.io.emit(`slides/${jobId}/presentationId`, presentationId);
       },
-      (slideId) => {
-        req.io.emit(`slides/${jobId}/slideReady`, slideId);
+      (slideId, presentationId) => {
+        req.io.emit(`slides/${jobId}/slideReady`, {slideId, presentationId});
       },
       (slideId, script) => {
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
@@ -112,14 +112,14 @@ slidesRouter.post(
         title,
         slidesOAuthToken: req.session.accessToken,
       },
-      (statusMessage) => {
-        req.io.emit(`slides/${jobId}/status`, statusMessage);
+      (statusMessage, presentationId) => {
+        req.io.emit(`slides/${jobId}/status`, {statusMessage, presentationId});
       },
       (presentationId) => {
         req.io.emit(`slides/${jobId}/presentationId`, presentationId);
       },
-      (slideId) => {
-        req.io.emit(`slides/${jobId}/slideReady`, slideId);
+      (slideId, presentationId) => {
+        req.io.emit(`slides/${jobId}/slideReady`, {slideId, presentationId});
       },
       (slideId, script) => {
         req.io.emit(`slides/${jobId}/scriptReady`, { slideId, script });
