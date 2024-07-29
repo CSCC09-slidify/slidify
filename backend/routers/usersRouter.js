@@ -5,6 +5,7 @@ import { validateUserCredentials } from "../middleware/auth.js";
 import oauthApi from "../tools/oauth/api.js";
 import { UserSettings } from "../models/userSettings.js";
 import { defaultUserSettings } from "../constants/userSettings.js";
+import { Job } from "../models/job.js";
 
 export const usersRouter = Router();
 
@@ -64,6 +65,13 @@ usersRouter.post("/signin", async (req, res) => {
 });
 
 usersRouter.post("/signout", async (req, res) => {
+  // TODO: remove / this is a debug feature
+  await Job.destroy({
+    where: {
+      UserUserId: req.session.userId,
+      status: "running"
+    }
+  });
   // TODO: revoke tokens ?
   req.session.destroy((err) => {
     if (err) {
@@ -72,7 +80,7 @@ usersRouter.post("/signout", async (req, res) => {
     }
     res.clearCookie("connect.sid");
     return res.json({ message: "Signed out successfully" });
-  });
+  });  
 });
 
 usersRouter.get("/whoami", async (req, res) => {
