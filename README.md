@@ -1,5 +1,8 @@
 # Slidify by MAC
 
+## Final deployed URL
+https://slidify.live
+
 ## Team members with @mail.utoronto.ca emails
 
 - Mohamed Besey: mohamed.besey@mail.utoronto.ca
