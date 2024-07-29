@@ -130,6 +130,7 @@ export default {
           websocket.off(`slides/${jid}/status`);
           websocket.off(`slides/${jid}/presentationId`);
         }
+        this.presentation.jobFinished = new Date().toISOString();
       });
       websocket.on(`slides/${jid}/status`, (res) => {
         this.presentation.status = res.statusMessage;
@@ -148,7 +149,7 @@ export default {
         this.presentation.presentationId = job.id;
         this.presentation.jobStarted = new Date().toISOString();
         const updateTimeElapsed = setInterval(() => {
-          if (this.presentation.status === "Completed" || this.presentation.finishedAt) {
+          if (this.presentation.status === "Completed" || this.presentation.jobFinished) {
             clearInterval(updateTimeElapsed);
           } else {
             this.presentation.timeElapsed = this.getTimeElapsed(this.presentation.jobStarted);
