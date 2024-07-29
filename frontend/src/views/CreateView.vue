@@ -80,7 +80,7 @@ export default {
         this.presentation.presentationTitle = job.title;
         this.presentation.jobStarted = job.startedAt;
         this.presentation.jobFinished = job.finishedAt;
-        this.presentation.status = "Loading...";
+        this.presentation.status = "Processing...";
         this.presentation.timeElapsed = this.getTimeElapsed(job.startedAt, job.finishedAt);
         const updateTimeElapsed = setInterval(() => {
           if (this.presentation.status === "Completed" || this.presentation.finishedAt) {
