@@ -127,6 +127,7 @@ export default {
             message: res.error,
           };
         } else {
+          history.pushState({}, "", `/presentations/${this.presentation.presentationId}`);
           websocket.off(`slides/${jid}/done`);
           websocket.off(`slides/${jid}/status`);
           websocket.off(`slides/${jid}/presentationId`);
