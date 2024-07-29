@@ -25,7 +25,6 @@ export const convertVideoToSlides = async (
 ) => {
   // Polling to check job status
   const checkJobStatus = (id, videoToken) => {
-    updateStatus("Processing Video");
     const timeout = setInterval(() => {
       console.log("Checking job " + id);
       videoApi
@@ -72,6 +71,7 @@ export const convertVideoToSlides = async (
       : await videoApi.sendVideoFromFile(file, speechmaticsToken, callbackUrl);
     if (jobData.id) {
       console.log("Speechmatics job id is " + jobData.id);
+      updateStatus("Processing Video");
       if (!callbackUrl) {
         checkJobStatus(jobData.id, speechmaticsToken, parseSummary);
       }
