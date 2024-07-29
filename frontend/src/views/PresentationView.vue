@@ -1,13 +1,12 @@
 <template>
-  <div class="d-flex flex-column mx-4 fill-height">
-    <div class="pa-1" v-if="presentation.presentationId">
-      <h1>{{ presentation.presentationTitle }}</h1>
-      <div class="text-subtitle-1">Status: {{ presentation.status }}</div>
+  <div class="px-12 py-8 h-100 d-flex flex-column align-stretch">
+    <div v-if="presentation.presentationId">
+      <h1 class="font-weight-medium" >{{ presentation.presentationTitle }}</h1>
       <div class="text-subtitle-1">
-        Job started: {{ presentation.jobStarted }}
+        <strong>Status:</strong> {{ presentation.status }}
       </div>
       <div class="text-subtitle-1">
-        Job completed: {{ presentation.jobFinished }}
+        <strong>Time Elapsed:</strong> {{ presentation.timeElapsed }}
       </div>
     </div>
     <GoogleSlides
@@ -16,7 +15,7 @@
       :presentation-title="presentation.presentationTitle"
       :presentation-id="presentation.externalId"
       :slide-scripts="presentation.slideScripts"
-      class="w-100 fill-height"
+      class="pb-4"
     />
     <div
       v-if="isLoading"
@@ -64,6 +63,22 @@ export default {
     },
   }),
   methods: {
+    getTimeElapsed(jobStarted, jobFinished) {
+      const ms = new Date(jobFinished) - new Date(jobStarted);
+      const seconds = Math.floor(ms / 1000);
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      let timeElapsed = "";
+      if (hours > 0) {
+        timeElapsed += `${hours}h `;
+      }
+      if (minutes > 0) {
+        timeElapsed += `${minutes}m `;
+      }
+      timeElapsed += `${secs}s`;
+      return timeElapsed;
+    },
     fetchPresentationData(presentationId) {
       this.isLoading = true;
       this.presentation = {};
@@ -74,21 +89,8 @@ export default {
           this.presentation.slideIds = res.slideIds;
           this.presentation.slideScripts = res.slideScripts;
           this.presentation.presentationTitle = res.title;
-          this.presentation.status = res.status;
-          const dateOptions = {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            hour12: true,
-          };
-          this.presentation.jobStarted = new Date(
-            res.jobStarted,
-          ).toLocaleString("en-US", dateOptions);
-          this.presentation.jobFinished = new Date(
-            res.jobFinished,
-          ).toLocaleString("en-US", dateOptions);
+          this.presentation.status = res.status ===  "done" ? "Completed" : "In progress";
+          this.presentation.timeElapsed = this.getTimeElapsed(res.jobStarted, res.jobFinished);
         }
         this.isLoading = false;
       });

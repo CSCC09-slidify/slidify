@@ -1,6 +1,6 @@
 <template>
-  <v-container class="ma-0 w-100 fill-height">
-    <v-row class="w-100">
+  <div class="d-flex flex-column w-100 h-100">
+    <div class="w-100">
       <a
         v-if="presentationId"
         :href="getPresentationUrl(presentationId)"
@@ -10,19 +10,19 @@
         <span>Open in Google Drive</span>
         <v-icon icon="mdi-open-in-new" class="ma-1"></v-icon>
       </a>
-    </v-row>
-    <v-row
+    </div>
+    <div
       v-if="presentationId"
-      class="w-100 align-center justify-center fill-height"
+      class="w-100 h-100"
     >
       <iframe
         id="slideDisplay"
         :src="getIframeUrl(presentationId)"
         frameborder="0"
-        class="w-100 fill-height"
+        class="d-flex align-stretch w-100 h-100 rounded"
       ></iframe>
-    </v-row>
-  </v-container>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -58,7 +58,7 @@ export default {
     //   return slideId ? `https://docs.google.com/presentation/d/${presentationId}/edit` : "";
     // },
     getIframeUrl(presentationId) {
-      return `https://docs.google.com/presentation/d/${presentationId}/edit?rm=embedded`;
+      return `https://docs.google.com/presentation/d/${presentationId}/edit?rm=demo`;
     },
     getPresentationUrl(presentationId) {
       return `https://docs.google.com/presentation/d/${presentationId}`;

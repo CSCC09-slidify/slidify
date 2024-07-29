@@ -1,48 +1,28 @@
 <template>
   <v-app>
-    <UserSessionModal
-      v-if="loginRequired == 'session'"
-      :onSignIn="reload"
-      header="Session Expired"
+    <UserSessionModal v-if="loginRequired == 'session'" :onSignIn="reload" header="Session Expired"
       headerIcon="mdi-clock-outline"
-      body="To continue, click the button below to sign in, or return to the homepage."
-    />
-    <UserSessionModal
-      v-if="loginRequired == 'signout'"
-      :onSignIn="reload"
-      header="Sign In"
-      headerIcon="mdi-account"
-      body="You must be signed in to view this page."
-    />
-    <v-navigation-drawer
-      v-if="isAuthenticated && showMainLayout"
-      v-model="drawer"
-      :permanent="!$vuetify.display.mobile"
-      class="d-flex flex-column"
-      :location="$vuetify.display.mobile ? 'bottom' : undefined"
-      :style="{ background: $vuetify.theme.themes.slidifyTheme.colors.surface }"
-    >
+      body="To continue, click the button below to sign in, or return to the homepage." />
+    <UserSessionModal v-if="loginRequired == 'signout'" :onSignIn="reload" header="Sign In" headerIcon="mdi-account"
+      body="You must be signed in to view this page." />
+    <v-navigation-drawer v-if="isAuthenticated && showMainLayout" v-model="drawer" class="d-flex flex-column"
+      :style="{ background: $vuetify.theme.themes.slidifyTheme.colors.surface }">
       <SlidesHistory :slidesHistory="slidesHistory" />
       <template v-slot:append>
-        <div class="d-flex justify-center pa-4">
-          <v-btn
-            to="/upload"
-            color="primary"
-            rounded="xl"
-            prepend-icon="mdi-plus"
-            class="text-lowercase w-100"
-          >
-            create slideshow
+        <div v-if="activeJob && activeJob.jid" class="d-flex flex-column justify-center ">
+          <v-divider></v-divider>
+          <v-list-item @click="goToCreate" color="primary" class="pa-4" link
+            :title="activeJob.title ? `In Progress: ${activeJob.title}` : '1 Job in Progress...'">
+          </v-list-item>
+        </div>
+        <div v-else class="d-flex justify-center pa-4">
+          <v-btn @click="goToCreate" color="primary" rounded="xl" prepend-icon="mdi-plus" class="text-lowercase w-100">
+            slideshow
           </v-btn>
         </div>
       </template>
     </v-navigation-drawer>
-    <v-app-bar
-      class="px-1"
-      color="white"
-      flat
-      v-if="isAuthenticated && showMainLayout"
-    >
+    <v-app-bar class="px-1" color="white" flat v-if="isAuthenticated && showMainLayout">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer">
         <v-btn icon><v-icon>mdi-menu</v-icon></v-btn>
       </v-app-bar-nav-icon>
@@ -51,22 +31,13 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <AccountSettingsButton />
-      <v-btn
-        @click="toggleNotifications"
-        id="notification-activator"
-        :icon="notification.active ? 'mdi-bell-badge' : 'mdi-bell'"
-      ></v-btn>
-      <NotificationList
-        activator="#notification-activator"
-        :content="notification.content"
-        :isOpened="notification.isOpen"
-        :clearNotifications="clearNotifications"
-        :onClose="closeNotifications"
-      />
-      <v-btn icon="mdi-dots-vertical"></v-btn>
+      <v-btn @click="toggleNotifications" id="notification-activator"
+        :icon="notification.active ? 'mdi-bell-badge' : 'mdi-bell'"></v-btn>
+      <NotificationList activator="#notification-activator" :content="notification.content"
+        :isOpened="notification.isOpen" :clearNotifications="clearNotifications" :onClose="closeNotifications" />
     </v-app-bar>
-    <v-main class="p-5">
-      <router-view></router-view>
+    <v-main>
+      <router-view :key="forceReload" @job-started="onJobStarted"></router-view>
     </v-main>
   </v-app>
 </template>
@@ -92,7 +63,7 @@ export default {
   },
   data: () => ({
     isAuthenticated: false,
-    drawer: true,
+    drawer: false,
     slidesHistory: [],
     notification: {
       active: false,
@@ -103,12 +74,15 @@ export default {
     loginRequired: "none",
     showMainLayout: false,
     accountSettings: false,
+    activeJob: null,
+    forceReload: 0,
   }),
   watch: {
     isAuthenticated: {
       deep: true,
       handler() {
         this.fetchSlidesHistory();
+        this.fetchActiveJob();
         if (this.isAuthenticated) {
           this.fetchNotifications();
           this.watchNotifications();
@@ -129,10 +103,21 @@ export default {
       deep: true,
       handler() {
         this.fetchSlidesHistory();
+        this.fetchActiveJob();
       },
     },
   },
   methods: {
+    forceReloadRoute() {
+      this.forceReload++;
+    },
+    goToCreate() {
+      if (this.$router.currentRoute.value.path === "/create") {
+        this.forceReloadRoute();
+      } else {
+        this.$router.push("/create");
+      }
+    },
     login() {
       googleLogin(() => {
         this.reload();
@@ -144,9 +129,13 @@ export default {
         this.$router.push("/");
       });
     },
-    updateAuthStatus(next = () => {}) {
+    updateAuthStatus(next = () => { }) {
       apiService.whoami().then((response) => {
         this.isAuthenticated = Boolean(response.userId);
+        next();
+      })
+      .catch(() => {
+        this.isAuthenticated = false;
         next();
       });
     },
@@ -157,6 +146,17 @@ export default {
         } else {
           this.slidesHistory = [];
         }
+      });
+    },
+    fetchActiveJob() {
+      return apiService.getSlideJobs().then((response) => {
+        console.log(response);
+        if (response.total > 0) {
+          this.activeJob = response.jobs[0];
+        } else {
+          this.activeJob = null;
+        }
+        console.log(this.activeJob);
       });
     },
     fetchNotifications() {
@@ -183,18 +183,22 @@ export default {
       apiService.whoami().then((res) => {
         if (this.isAuthenticated && res.userId) {
           websocket.on(`notification/${res.userId}/new`, (r) => {
-            this.notification.content.splice(0, 0, {
-              text: r.content.title,
-              date: r.date,
-              link:
-                r.type == "presentation"
-                  ? `/presentations/${r.content.presentationId}`
-                  : "",
-            });
+            if (!this.notification.content.find(n => n.link == `/presentations/${r.content.presentationId}`)) {
+              this.notification.content.splice(0, 0, {
+                text: r.content.title,
+                date: r.date,
+                link:
+                  r.type == "presentation"
+                    ? `/presentations/${r.content.presentationId}`
+                    : "",
+              });
+              this.notification.active = true;
+            }
             this.notification.active = true;
             if (r.type == "presentation") {
               this.waitingForPresentation = false;
               this.fetchSlidesHistory();
+              this.fetchActiveJob();
             }
           });
         } else {
@@ -226,11 +230,18 @@ export default {
     reload() {
       this.$router.go(0);
     },
+    onJobStarted(title) {
+      this.fetchActiveJob().then(() => {
+        this.activeJob.title = title;
+      });
+    },
   },
 
   created() {
+    this.drawer = !this.$vuetify.display.mobile;
     this.updateAuthStatus(this.displayLogin);
     this.fetchSlidesHistory();
+    this.fetchActiveJob();
     const route = useRoute();
     watch(route, (to) => {
       console.log("Change route");
@@ -242,9 +253,26 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 a {
   text-decoration: none;
-  color: black;
+  color: rgb(117, 0, 98);
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+h4 {
+  font-size: 1rem;
 }
 </style>

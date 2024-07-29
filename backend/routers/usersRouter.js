@@ -3,6 +3,11 @@ import { User } from "../models/user.js";
 import { OAuth2Client } from "google-auth-library";
 import { validateUserCredentials } from "../middleware/auth.js";
 import oauthApi from "../tools/oauth/api.js";
+import { UserSettings } from "../models/userSettings.js";
+import { defaultUserSettings } from "../constants/userSettings.js";
+import { Job } from "../models/job.js";
+import { Presentation } from "../models/presentation.js";
+import { Notification } from "../models/notification.js";
 
 export const usersRouter = Router();
 
@@ -37,6 +42,10 @@ usersRouter.post("/signin", async (req, res) => {
         userId: userId,
         name: payload["name"],
       });
+      await UserSettings.create({
+        config: defaultUserSettings,
+        UserUserId: userId
+      })
     }
 
     client.setCredentials({ access_token: tokens.access_token });
@@ -66,7 +75,7 @@ usersRouter.post("/signout", async (req, res) => {
     }
     res.clearCookie("connect.sid");
     return res.json({ message: "Signed out successfully" });
-  });
+  });  
 });
 
 usersRouter.get("/whoami", async (req, res) => {
@@ -95,12 +104,39 @@ usersRouter.get("/whoami", async (req, res) => {
 
 usersRouter.delete("/", validateUserCredentials, async (req, res) => {
   const userId = req.session.userId;
+  await Presentation.destroy({
+    where: {
+      UserUserId: userId
+    }
+  });
+  await Notification.destroy({
+    where: {
+      actorId: userId
+    }
+  })
+  await Job.destroy({
+    where: {
+      UserUserId: userId
+    }
+  })
+  await UserSettings.destroy({
+    where: {
+      UserUserId: userId
+    }
+  })
   await User.destroy({
     where: {
       userId: userId,
     },
   });
-  return res.status(204);
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Failed to destroy session:", err);
+      return res.status(500).json({ error: "Failed to sign out of session" });
+    }
+    res.clearCookie("connect.sid");
+    return res.json({ message: "Deleted account successfully" });
+  });  
 });
 
 usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
@@ -111,9 +147,56 @@ usersRouter.get("/profile", validateUserCredentials, async (req, res) => {
     });
 });
 
-usersRouter("/test", async (req, res) => {
+
+usersRouter.get("/settings", validateUserCredentials, async (req, res) => {
+  const { userId } = req.session;
+  const userSettings = await UserSettings.findOne({
+    where: {
+      UserUserId: userId
+    }
+  });
+  console.log("Got user settings: ")
+  console.log(userSettings)
+  if (userSettings) {
+    console.log("Config is")
+    console.log(userSettings.config)
+    if (!userSettings.config || userSettings.config == {} || !userSettings.config.headingFontFamily) {
+      console.log("Setting new config: ")
+      console.log(defaultUserSettings);
+      userSettings.config = defaultUserSettings;
+      await userSettings.save();
+    }
+    return res.json(userSettings.config)
+  } else {
+    const newSettings = await UserSettings.create({
+      config: defaultUserSettings,
+      UserUserId: userId
+    })
+    return res.json(defaultUserSettings)
+  }
+});
+
+usersRouter.patch("/settings", validateUserCredentials, async (req, res) => {
+  const { userId } = req.session;
+  const newSettings = req.body;
+  await UserSettings.update(
+    {config: newSettings},
+    {
+      where: {
+        UserUserId: userId
+      }
+    }
+  )
+  return res.json(newSettings)
+})
+
+usersRouter.post("/test/:jobId", async (req, res) => {
   console.log("TEST ENDPOINT HIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
   console.log(req.params)
   console.log(req.body)
-  return res.status(204);
+  const headers = req.headers;
+  console.log(headers)
+  const authHeaders = req.headers.authorization;
+  console.log(authHeaders)
+  return res.json({message: "received"});
 })

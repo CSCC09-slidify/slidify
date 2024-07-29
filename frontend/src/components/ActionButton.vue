@@ -1,10 +1,10 @@
 <template>
   <v-btn
-    color="onPrimary"
+    :color="onPrimary"
     rounded="xl"
     size="large"
     :prepend-icon="icon"
-    class="mx-auto w-100 text-capitalize bg-primary"
+    :class="`mx-auto w-100 text-capitalize bg-${color ? color : 'primary'}`"
     @click="onClick"
   >
     <span class="text-body-1">{{ text }}</span>
@@ -12,6 +12,6 @@
 </template>
 <script>
 export default {
-  props: ["text", "icon", "onClick"],
+  props: ["text", "icon", "onClick", "color"],
 };
 </script>

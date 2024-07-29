@@ -33,10 +33,6 @@ export default {
 </script>
 
 <style scoped>
-.slidesHistory a {
-  text-decoration: none;
-  color: black;
-}
 .isCurrentPresentation {
   background-color: rgb(var(--v-theme-surfaceActive)) !important;
 }

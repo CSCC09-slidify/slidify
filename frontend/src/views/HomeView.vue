@@ -1,32 +1,39 @@
 <template>
-  <v-container>
-    <p>Convert from:</p>
-    <v-radio-group inline v-model="inputType" hide-details="auto">
-      <v-radio label="Video or Audio" value="video"></v-radio>
-      <v-radio label="Text" value="text"></v-radio>
-    </v-radio-group>
-    <VideoUpload v-if="inputType == 'video'" :on-submit="submitVideo" />
-    <TextUpload v-if="inputType == 'text'" :on-submit="submitText" />
-    <ErrorMessage v-if="error.hasError" :message="error.message" />
-    <GoogleSlides
-      v-if="presentation.presentationId"
-      :slide-ids="presentation.slideIds"
-      :presentation-title="presentation.presentationTitle"
-      :presentation-id="presentation.presentationId"
-      :slide-scripts="presentation.slideScripts"
-      class="w-100 fill-height"
-    />
-    <v-row class="align-center justify-center pa-4">
-      <v-col
-        v-if="isLoading"
-        :cols="12"
-        :md="presentation.presentationId ? 4 : 12"
-        :lg="presentation.presentationId ? 4 : 12"
-      >
-        <LoadingSpinner :loading-message="loadingMessage" />
-      </v-col>
-    </v-row>
-  </v-container>
+  <ErrorMessage v-if="error.hasError" :message="error.message" />
+  <div v-if="!presentation.presentationId" class="px-12 py-8 h-100 d-flex flex-column align-stretch">
+    <div class="slides-form w-100">
+      <v-radio-group class="d-flex" v-model="inputType" inline hide-details="auto">
+        <template v-slot:label>
+          <div>Convert from:</div>
+        </template>
+        <v-radio label="Video or Audio (max 100 MB)" value="video"></v-radio>
+        <v-radio label="Text (max 1000 words)" value="text"></v-radio>
+        <v-spacer></v-spacer>
+        <v-btn class="ma-2" variant="text" to="/settings" rounded="xl">Adjust Slide settings</v-btn>
+      </v-radio-group>
+      <VideoUpload v-if="inputType == 'video'" :on-submit="submitVideo" />
+      <TextUpload v-if="inputType == 'text'" :on-submit="submitText" />
+    </div>
+  </div>
+  <div v-else class="px-12 py-8 h-100 d-flex flex-column align-stretch">
+    <div>
+      <h1 class="font-weight-medium">{{ presentation.presentationTitle }}</h1>
+      <div class="text-subtitle-1">
+        <strong>Status:</strong> {{ presentation.status }}
+      </div>
+      <div class="text-subtitle-1">
+        <strong>Time Elapsed:</strong> {{ presentation.timeElapsed }}
+      </div>
+    </div>
+    <GoogleSlides v-if="presentation.externalId" :slide-ids="presentation.slideIds"
+      :presentation-title="presentation.presentationTitle" :presentation-id="presentation.externalId"
+      :slide-scripts="presentation.slideScripts" class="w-100 fill-height" />
+    <div v-else-if="isLoading" class="align-center justify-center pa-4">
+      <div :cols="12" :md="presentation.externalId ? 4 : 12" :lg="presentation.externalId ? 4 : 12">
+        <LoadingSpinner :loading-message="presentation.status" />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -47,6 +54,7 @@ export default {
     ErrorMessage,
     GoogleSlides,
   },
+  emits: ['job-started'],
   data: () => ({
     isLoading: false,
     loadingMessage: "",
@@ -57,45 +65,97 @@ export default {
     presentation: {
       presentationId: "",
       presentationTitle: null,
-      slideIds: [],
-      slideScripts: {},
       externalId: "",
       status: "",
       jobStarted: "",
       jobFinished: "",
+      timeElapsed: "",
     },
     inputType: "video",
   }),
+  created() {
+    apiService.getSlideJobs().then((response) => {
+      console.log(response);
+      if (response.total > 0) {
+        const job = response.jobs[0];
+        this.presentation.presentationId = job.jid;
+        this.presentation.presentationTitle = job.title;
+        this.presentation.jobStarted = job.startedAt;
+        this.presentation.jobFinished = job.finishedAt;
+        this.presentation.status = "Processing...";
+        this.presentation.timeElapsed = this.getTimeElapsed(job.startedAt, job.finishedAt);
+        const updateTimeElapsed = setInterval(() => {
+          if (this.presentation.status === "Completed" || this.presentation.finishedAt) {
+            clearInterval(updateTimeElapsed);
+          } else {
+            this.presentation.timeElapsed = this.getTimeElapsed(job.startedAt);
+          }
+        }, 1000);
+        this.isLoading = true;
+        this.initSockets(job.jid);
+      }
+    });
+  },
   methods: {
+    getTimeElapsed(start, end) {
+      if (!end) {
+        end = new Date().toISOString()
+      }
+      const ms = new Date(end) - new Date(start);
+      const seconds = Math.floor(ms / 1000);
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      let timeElapsed = "";
+      if (hours > 0) {
+        timeElapsed += `${hours}h `;
+      }
+      if (minutes > 0) {
+        timeElapsed += `${minutes}m `;
+      }
+      timeElapsed += `${secs}s`;
+      return timeElapsed;
+    },
+    initSockets(jid) {
+      websocket.on(`slides/${jid}/done`, (res) => {
+        this.isLoading = false;
+        if (res.error) {
+          this.error = {
+            hasError: true,
+            message: res.error,
+          };
+        } else {
+          history.pushState({}, "", `/presentations/${this.presentation.presentationId}`);
+          websocket.off(`slides/${jid}/done`);
+          websocket.off(`slides/${jid}/status`);
+          websocket.off(`slides/${jid}/presentationId`);
+        }
+        this.presentation.jobFinished = new Date().toISOString();
+      });
+      websocket.on(`slides/${jid}/status`, (res) => {
+        this.presentation.status = res.statusMessage;
+        if (!this.presentation.externalId && res.presentationId) {
+          this.presentation.externalId = res.presentationId;
+        }
+      });
+      websocket.on(`slides/${jid}/presentationId`, (presentationId) => {
+        this.presentation.externalId = presentationId;
+      });
+    },
     setupSlideJob(job) {
       if (job.id) {
-        // TODO: Move URL to .env
-        websocket.on(`slides/${job.id}/done`, (res) => {
-          this.isLoading = false;
-          if (res.error) {
-            this.error = {
-              hasError: true,
-              message: res.error,
-            };
+        this.$emit("job-started", this.presentation.presentationTitle);
+        this.initSockets(job.id);
+        this.presentation.presentationId = job.id;
+        this.presentation.jobStarted = new Date().toISOString();
+        const updateTimeElapsed = setInterval(() => {
+          if (this.presentation.status === "Completed" || this.presentation.jobFinished) {
+            clearInterval(updateTimeElapsed);
+          } else {
+            this.presentation.timeElapsed = this.getTimeElapsed(this.presentation.jobStarted);
           }
-          console.log(this.presentation.slideScripts);
-        });
-
-        websocket.on(`slides/${job.id}/status`, (status) => {
-          this.loadingMessage = status;
-        });
-
-        websocket.on(`slides/${job.id}/slideReady`, (slideId) => {
-          this.presentation.slideIds.push(slideId);
-        });
-
-        websocket.on(`slides/${job.id}/scriptReady`, ({ slideId, script }) => {
-          this.presentation.slideScripts[slideId] = script;
-        });
-
-        websocket.on(`slides/${job.id}/presentationId`, (presentationId) => {
-          this.presentation.presentationId = presentationId;
-        });
+        }, 1000);
+        console.log("job started", job.id);
       } else {
         this.error = {
           hasError: true,
@@ -108,6 +168,7 @@ export default {
       // TODO: input token
       this.isLoading = true;
       this.error.hasError = false;
+      this.loadingMessage = "";
       (this.presentation = {
         presentation: null,
         presentationTitle: "",
@@ -121,10 +182,10 @@ export default {
     },
     submitText(text, title) {
       console.log("text uploaded", title);
-      if (text.split(" ").length < 200) {
+      if (text.split(" ").length < 50) {
         this.error = {
           hasError: true,
-          message: "Text must be at least 200 words long",
+          message: "Text must be at least 50 words long",
         };
         return;
       } else if (text.split(" ").length > 1000) {
@@ -134,6 +195,7 @@ export default {
         };
         return;
       }
+      this.loadingMessage = "";
       this.isLoading = true;
       this.error.hasError = false;
       (this.presentation = {

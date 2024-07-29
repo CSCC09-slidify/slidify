@@ -12,6 +12,15 @@
       >
       </v-list-item>
       <v-divider></v-divider>
+      <v-list-item class="mt-2" :key="settings" value="settings" @click="settingsClick">
+        <template v-slot:prepend>
+          <v-icon
+            icon="mdi-cog"
+            :style="{ marginRight: '-1rem' }"
+          ></v-icon>
+        </template>
+        <v-list-item-title>Settings</v-list-item-title>
+      </v-list-item>      
       <v-list-item class="mt-2" :key="signout" value="signout" @click="logout">
         <template v-slot:prepend>
           <v-icon
@@ -36,6 +45,9 @@ export default {
   methods: {
     logout() {
       googleLogout(() => this.$router.push("/"));
+    },
+    settingsClick() {
+      this.$router.push("/settings")
     },
     getUserProfile() {
       apiService.getUserProfile().then((res) => {
