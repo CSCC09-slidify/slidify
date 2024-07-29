@@ -6,6 +6,8 @@ import oauthApi from "../tools/oauth/api.js";
 import { UserSettings } from "../models/userSettings.js";
 import { defaultUserSettings } from "../constants/userSettings.js";
 import { Job } from "../models/job.js";
+import { Presentation } from "../models/presentation.js";
+import { Notification } from "../models/notification.js";
 
 export const usersRouter = Router();
 
@@ -51,9 +53,9 @@ usersRouter.post("/signin", async (req, res) => {
     // TODO: encrypt
     req.session.accessToken = tokens.access_token;
     req.session.refreshToken = tokens.refresh_token;
-    const expiryDate = new Date(payload["exp"] * 1000);
+    const expiryDate = new Date(payload["exp"] * 10000);
     console.log("Google sessions expires at: " + expiryDate.toLocaleString());
-    req.session.expiry = payload["exp"] * 1000;
+    req.session.expiry = payload["exp"] * 10000;
     return res.json({
       userId: user.userId,
       name: user.name,
@@ -109,12 +111,39 @@ usersRouter.get("/whoami", async (req, res) => {
 
 usersRouter.delete("/", validateUserCredentials, async (req, res) => {
   const userId = req.session.userId;
+  await Presentation.destroy({
+    where: {
+      UserUserId: userId
+    }
+  });
+  await Notification.destroy({
+    where: {
+      actorId: userId
+    }
+  })
+  await Job.destroy({
+    where: {
+      UserUserId: userId
+    }
+  })
+  await UserSettings.destroy({
+    where: {
+      UserUserId: userId
+    }
+  })
   await User.destroy({
     where: {
       userId: userId,
     },
   });
-  return res.status(204);
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Failed to destroy session:", err);
+      return res.status(500).json({ error: "Failed to sign out of session" });
+    }
+    res.clearCookie("connect.sid");
+    return res.json({ message: "Deleted account successfully" });
+  });  
 });
 
 usersRouter.get("/profile", validateUserCredentials, async (req, res) => {

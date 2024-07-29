@@ -12,7 +12,7 @@
                         </v-btn>
                     </div>
                 </v-col>
-                <v-col cols="6" class="w-100">
+                <v-col cols="6" class="w-100 pb-0">
                     <div class="text-h6 mb-2">Heading Font Family</div>
                     <v-select
                         @update:modelValue="changeInput"
@@ -43,7 +43,7 @@
                         </template>
                     </v-select>
                 </v-col>
-                <v-col cols="6">
+                <v-col cols="6" class="pb-0">
                     <div class="text-h6 mb-2">Heading Font Colour</div>
                     <v-menu
                         v-model="headingFontMenu"
@@ -101,7 +101,7 @@
                         ></v-color-picker>
                     </v-menu>
                 </v-col>
-                <v-col cols="12">
+                <v-col cols="12" class="pt-0">
                     <div class="text-h6 mb-2">Background Colour</div>
                     <v-menu
                         v-model="backgroundColourMenu"
@@ -144,9 +144,7 @@
                             <v-list-item class="bg-white" v-bind="props" :key="item"></v-list-item>
                         </template>
                     </v-select>
-                </v-col>
-                <v-col cols=12>
-                    <v-btn rounded="lg" :disabled="saving || !changed" class="w-100 text-capitalize" size="large" color="primary" @click="onSaveSlideSettings">
+                    <v-btn rounded="lg" :disabled="saving || !changed" class="w-100 text-capitalize mt-2" size="large" color="primary" @click="onSaveSlideSettings">
                         Save Changes
                         <template v-slot:append>
                             <v-progress-circular size="22" width="3" color="onPrimary" v-if="saving" indeterminate></v-progress-circular>
@@ -155,12 +153,83 @@
                 </v-col>
             </v-row>
         </v-form>
+        <v-form class="mt-5">
+            <v-row class="w-100">
+                <v-col cols="12">
+                    <div class="w-100 d-flex justify-space-between">
+                        <div class="text-h4">
+                            Account Settings
+                        </div>
+                    </div>
+                </v-col>
+                <v-col cols="12">
+                    Deleting your account data will remove all items with your google account information from the Slidify database,
+                    including user sessions, notification history, slide settings and all generated presentation history.
+                </v-col>
+                <v-col cols=12>
+                    <v-dialog max-width="500">
+                        <template v-slot:activator="{ props: activatorProps }">
+                            <v-btn rounded="lg" v-bind="activatorProps" class="w-100 text-capitalize" size="large" color="red-accent-4">
+                                Delete All Account Data
+                                <template v-slot:append>
+                                    <v-progress-circular size="22" width="3" color="onPrimary" v-if="saving" indeterminate></v-progress-circular>
+                                </template>
+                            </v-btn>
+                        </template>
+
+                        <template v-slot:default="{ isActive }">
+                            <v-card class="rounded-xl" color="onPrimary">
+                                <v-card-title
+                                    color="primary"
+                                    class="bg-primary py-7 px-12 d-flex align-center"
+                                >
+                                    <v-icon size="48" color="onPrimary" icon="mdi-alert-circle"></v-icon>
+                                    <div
+                                    class="w-100 text-center text-h4 ps-2"
+                                    :style="{ paddingRight: `${40 - deleteAccountHeader.length * 2}px` }"
+                                    >
+                                        {{ deleteAccountHeader }}
+                                    </div>
+                                </v-card-title>
+                                <v-card-text class="pa-8">
+                                    This account will be irreversable. 
+                                    You will be able to continue using Slidify under the same google account by repeating the signin process.
+                                </v-card-text>
+
+                                <v-card-actions class="d-flex flex-column justify-center">
+                                    <v-col cols="12" sm="8">
+                                    <ActionButton
+                                        class="ma-2"
+                                        icon=""
+                                        text="Cancel"
+                                        :onClick="() => isActive.value = false"
+                                    />
+                                    <ActionButton
+                                        class="mb-4"
+                                        icon="mdi-alert"
+                                        text="Delete Account"
+                                        color="red-accent-4"
+                                        :onClick="deleteAccount"
+                                    />
+                                    </v-col>
+                                </v-card-actions>
+                                </v-card>
+                        </template>
+                        </v-dialog>
+                </v-col>
+            </v-row>
+        </v-form>
     </v-container>
 </template>
 <script>
 import apiService from "@/services/api.service";
 import { availableFonts } from "@/constants/settings.js"
+import ActionButton from "@/components/ActionButton.vue";
+
 export default {
+    components: {
+        ActionButton
+    },
     watch: {
         headingFontColour: {
             handler(c) {
@@ -211,7 +280,8 @@ export default {
         bodyFontFamily: "Monsterrat",
         positioning: "default",
         saving: false,
-        availableFonts: availableFonts
+        availableFonts: availableFonts,
+        deleteAccountHeader: "Deleting Account"
     }),
     methods: {
         changeInput() {
@@ -234,6 +304,12 @@ export default {
                 this.saving = false;
                 this.changed = false;
             })
+        },
+        deleteAccount() {
+            apiService.deleteAccount()
+                .then(() => {
+                    this.$router.push("/")
+                })
         }
     },
     created() {

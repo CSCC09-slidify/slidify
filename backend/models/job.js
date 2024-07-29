@@ -19,6 +19,10 @@ export const Job = sequelize.define("SlidifyPresentationJob", {
   finishedAt: {
     type: DataTypes.DATE,
   },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 });
 
 User.hasMany(Job);
