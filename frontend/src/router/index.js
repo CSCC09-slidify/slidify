@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import CreateView from "../views/CreateView.vue";
 import PresentationView from "../views/PresentationView.vue";
 import MainLayoutView from "../views/MainLayoutView.vue";
 import LandingView from "../views/LandingView.vue";
@@ -13,9 +13,9 @@ const router = createRouter({
       component: MainLayoutView,
       children: [
         {
-          path: "/upload",
+          path: "/create",
           name: "home",
-          component: HomeView,
+          component: CreateView,
           meta: { requiresAuth: true },
         },
         {

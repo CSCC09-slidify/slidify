@@ -245,7 +245,7 @@ export const parseSummary = async (
     );
     slideIds.push("imageReferencesSlide");
     slideReady("imageReferencesSlide");
-    updateStatus("Finishing");
+    updateStatus("Completed");
     next({
       presentationId,
       numSlides: summary.length + 1,

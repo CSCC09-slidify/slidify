@@ -1,5 +1,5 @@
 <template>
-  <div class="px-8 h-100 d-flex flex-column align-stretch">
+  <div class="px-12 py-8 h-100 d-flex flex-column align-stretch">
     <div v-if="presentation.presentationId">
       <h1 class="font-weight-medium" >{{ presentation.presentationTitle }}</h1>
       <div class="text-subtitle-1">

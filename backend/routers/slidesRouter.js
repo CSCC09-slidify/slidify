@@ -28,12 +28,13 @@ slidesRouter.post(
     const { title } = req.query;
     const { userId } = req.session;
     // TODO: store jobs and generate IDs elsewhere
-    const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 10000)}`;
+    const jobId = Date.now() + "m" + `${Math.floor(Math.random() * 1000)}`;
     const job = await Job.create({
       jid: jobId,
       status: "running",
       startedAt: new Date(),
       UserUserId: userId,
+      title,
     });
     convertVideoToSlides(
       {
@@ -103,6 +104,7 @@ slidesRouter.post(
       status: "running",
       startedAt: new Date(),
       UserUserId: userId,
+      title,
     });
     convertTextToSlides(
       {
@@ -147,6 +149,7 @@ slidesRouter.post(
         } else {
           job.status = "error";
         }
+        job.finishedAt = new Date();
         await job.save();
         req.io.emit(`slides/${jobId}/done`, r);
       },
@@ -234,13 +237,13 @@ slidesRouter.get(
 
 slidesRouter.get("/jobs/active", validateUserCredentials, async (req, res) => {
   const userId = req.session.userId;
-  const activeJobs = await Job.findAll({
+  const activeJobs = await Job.findAndCountAll({
     where: {
       UserUserId: userId,
       status: "running",
     },
   });
-  return res.json({ jobs: activeJobs });
+  return res.json({ jobs: activeJobs.rows, total: activeJobs.count });
 });
 
 // For debugging
