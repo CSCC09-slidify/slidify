@@ -183,7 +183,7 @@ export default {
       apiService.whoami().then((res) => {
         if (this.isAuthenticated && res.userId) {
           websocket.on(`notification/${res.userId}/new`, (r) => {
-            if (!this.notification.find(n => n.link == `/presentations/${r.content.presentationId}`)) {
+            if (!this.notification.content.find(n => n.link == `/presentations/${r.content.presentationId}`)) {
               this.notification.content.splice(0, 0, {
                 text: r.content.title,
                 date: r.date,
