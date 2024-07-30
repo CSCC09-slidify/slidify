@@ -19,8 +19,8 @@ const httpServer = http.createServer(app);
 
 const PORT = 3000;
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '100mb' }));
+app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 
 try {
   await sequelize.authenticate();
